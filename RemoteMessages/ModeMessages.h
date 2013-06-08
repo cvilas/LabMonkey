@@ -39,7 +39,7 @@ public:
 class GetModeCommand : public RemoteCommandT<0>
 {
 public:
-    GetModeCommand() { initialise(RemoteMessage::SET_MODE, 0, NULL); }
+    GetModeCommand() { initialise(RemoteMessage::GET_MODE, 0, NULL); }
     ~GetModeCommand() {}
 }; // GetModeCommand
 
