@@ -57,6 +57,9 @@ class ModeResponse : public RemoteResponseT<1>
 public:
     ModeResponse() {}
     virtual ~ModeResponse() {}
+
+    /// Calls base class method of same name and additionally
+    /// verifies message ID is correct.
     virtual bool validate()
     {
         RemoteMessage::MessageID id = id();

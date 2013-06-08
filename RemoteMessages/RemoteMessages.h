@@ -135,8 +135,8 @@ public:
     RemoteResponseT() : RemoteMessageT<nPayloadBytes>() {}
     virtual ~RemoteResponseT() {}
 
-    /// Verify that the message construction is correct
-    /// The method verifies message start, checksum and end bytes but not the payload.
+    /// Verify that the message construction is correct. The method verifies
+    /// message start, checksum and end bytes but not the payload.
     /// Derived classes can override this method to provide additional checks.
     /// \return true if the message format is correct
     virtual bool validate();
