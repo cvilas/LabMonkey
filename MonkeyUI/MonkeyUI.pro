@@ -13,11 +13,13 @@ TEMPLATE = app
 
 INCLUDEPATH += ./ ../
 SOURCES += main.cpp\
-        MainWindow.cpp
+        MainWindow.cpp \
+    ../MonkeyMessages/MessageFramer.cpp
 
 HEADERS  += \
     MainWindow.h \
-    ../RemoteMessages/RemoteMessages.h \
-    ../RemoteMessages/ModeMessages.h
+    ../MonkeyMessages/RemoteMessages.h \
+    ../MonkeyMessages/ModeMessages.h \
+    ../MonkeyMessages/MessageFramer.h
 
 FORMS    += MainWindow.ui

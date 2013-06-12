@@ -20,15 +20,17 @@
 ///
 /// Remote console messages are formatted as follows
 /// \code
-/// [START_BYTE][ID][N][.... payload ....][CSUM][END_BYTE]
+/// [ID][N][.... payload ....][CSUM]
 /// \endcode
 /// where
-/// - START_BYTE (1 byte): 0xAA
 /// - ID (1 byte): One of the codes from RemoteMessage::MessageID
 /// - N (1 byte): number of bytes in the payload
 /// - payload (N bytes): The payload bytes
-/// - CSUM (1 byte): Checksum computed over the entire message except START_BYTE and END_BYTE
-/// - END_BYTE (1 byte): 0xFF
+/// - CSUM (1 byte): Checksum computed over the entire message
+///
+/// Before transmitting data to remote endpoint, the message is framed by passing it through
+/// the MessageFramer. Similarly, data received from the remote end is first unframed using
+/// the MessageFramer before processing the message.
 class RemoteMessage
 {
 public:
@@ -56,11 +58,8 @@ public:
     };
 
 public:
-    static const unsigned int START_BYTE            = 0xAA;
-    static const unsigned int END_BYTE              = 0xFF;
-
-    static const unsigned int ID_INDEX              = 1;
-    static const unsigned int PAYLOAD_LENGTH_INDEX  = 2;
+    static const unsigned int ID_INDEX              = 0;
+    static const unsigned int PAYLOAD_LENGTH_INDEX  = 1;
 
 public:
     virtual unsigned char* bytes() const = 0;
@@ -89,14 +88,14 @@ public:
     unsigned int payloadLength() const { return nPayloadBytes; }
 
     MessageID id() const { return MessageID(_bytes[ID_INDEX]&0xFF); }
-    unsigned char csum() const { return _bytes[size()-2]&0xFF; }
+    unsigned char csum() const { return _bytes[size()-1]&0xFF; }
 
 protected:
     RemoteMessageT() : RemoteMessage() {}
     virtual ~RemoteMessageT() {}
 
 protected:
-    unsigned char _bytes[nPayloadBytes + 5/*START, ID, N, CSUM, END*/];
+    unsigned char _bytes[nPayloadBytes + 3/*ID, N, CSUM*/];
 }; // RemoteMessage
 
 
@@ -120,7 +119,7 @@ protected:
 
     /// Derived classes must always call this method whenever it modifies the command
     /// message buffer in any way.
-    void setCommandModified() { _bytes[size()-2] = computeChecksum(); }
+    void setCommandModified() { _bytes[size()-1] = computeChecksum(); }
 
 }; // RemoteCommand
 
@@ -148,9 +147,9 @@ unsigned char RemoteMessage::computeChecksum()
 //-----------------------------------------------------------------------------
 {
     unsigned int csum = 0;
-    unsigned int end = size()-2; // ignore first byte and the last two bytes
+    unsigned int end = size()-1; // ignore first byte and the last two bytes
     unsigned char* pBytes = bytes();
-    for( unsigned int i = 1; i < end; ++i )
+    for( unsigned int i = 0; i < end; ++i )
     {
         csum += (unsigned int)(pBytes[i]);
     }
@@ -162,16 +161,12 @@ template<unsigned int np>
 void RemoteCommandT<np>::initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char *pPayloadData)
 //-----------------------------------------------------------------------------
 {
-    /// [START_BYTE][ID][N][.... payload ....][CSUM][END_BYTE]
-
-    _bytes[0] = RemoteMessage::START_BYTE;
-    _bytes[size()-1] = RemoteMessage::END_BYTE;
     _bytes[ID_INDEX] = id;
     _bytes[PAYLOAD_LENGTH_INDEX] = len;
 
     unsigned int i = PAYLOAD_LENGTH_INDEX + 1;
     unsigned int j = 0;
-    while( i < (size() - 2) )
+    while( i < (size() - 1) )
     {
         if( j < len )
         {
@@ -193,19 +188,7 @@ template<unsigned int np>
 bool RemoteResponseT<np>::validate()
 //-----------------------------------------------------------------------------
 {
-    if( _bytes[0] != RemoteMessage::START_BYTE )
-    {
-        return false;
-    }
-    if( csum() != computeChecksum() )
-    {
-        return false;
-    }
-    if( _bytes[size()-1] != RemoteMessage::END_BYTE )
-    {
-        return false;
-    }
-    return true;
+    return ( csum() == computeChecksum() );
 }
 
 #endif // REMOTEMESSAGES_H

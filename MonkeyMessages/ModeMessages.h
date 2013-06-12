@@ -14,7 +14,7 @@
 ///
 /// Message format:
 /// \code
-/// [START_BYTE][SET_MODE][1][Mode][CSUM][END_BYTE]
+/// [SET_MODE][1][Mode][CSUM]
 /// \endcode
 /// \see ModeResponse
 class SetModeCommand : public RemoteCommandT<1>
@@ -33,7 +33,7 @@ public:
 ///
 /// Message format:
 /// \code
-/// [START_BYTE][GET_MODE][0][CSUM][END_BYTE]
+/// [GET_MODE][0][CSUM]
 /// \endcode
 /// \see ModeResponse
 class GetModeCommand : public RemoteCommandT<0>
@@ -49,7 +49,7 @@ public:
 ///
 /// Message format:
 /// \code
-/// [START_BYTE][SET_MODE or GET_MODE][1][Mode][CSUM][END_BYTE]
+/// [SET_MODE or GET_MODE][1][Mode][CSUM]
 /// \endcode
 /// \see SetModeCommand, GetModeCommand
 class ModeResponse : public RemoteResponseT<1>
