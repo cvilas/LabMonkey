@@ -87,8 +87,8 @@ public:
     virtual unsigned int size() const { return nPayloadBytes + 5; }
     unsigned int payloadLength() const { return nPayloadBytes; }
 
-    MessageID id() const { return MessageID(_bytes[ID_INDEX]&0xFF); }
-    unsigned char csum() const { return _bytes[size()-1]&0xFF; }
+    MessageID id() const { return MessageID(_bytes[RemoteMessage::ID_INDEX]&0xFF); }
+    unsigned char csum() const { return this->_bytes[this->size()-1]&0xFF; }
 
 protected:
     RemoteMessageT() : RemoteMessage() {}
@@ -119,7 +119,7 @@ protected:
 
     /// Derived classes must always call this method whenever it modifies the command
     /// message buffer in any way.
-    void setCommandModified() { _bytes[size()-1] = computeChecksum(); }
+    void setCommandModified() { this->_bytes[this->size()-1] = this->computeChecksum(); }
 
 }; // RemoteCommand
 
@@ -161,21 +161,21 @@ template<unsigned int np>
 void RemoteCommandT<np>::initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char *pPayloadData)
 //-----------------------------------------------------------------------------
 {
-    _bytes[ID_INDEX] = id;
-    _bytes[PAYLOAD_LENGTH_INDEX] = len;
+    this->_bytes[RemoteMessage::ID_INDEX] = id;
+    this->_bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX] = len;
 
-    unsigned int i = PAYLOAD_LENGTH_INDEX + 1;
+    unsigned int i = RemoteMessage::PAYLOAD_LENGTH_INDEX + 1;
     unsigned int j = 0;
-    while( i < (size() - 1) )
+    while( i < (this->size() - 1) )
     {
         if( j < len )
         {
-            _bytes[i] = pPayloadData[j];
+            this->_bytes[i] = pPayloadData[j];
             ++j;
         }
         else
         {
-            _bytes[i] = 0;
+            this->_bytes[i] = 0;
         }
         ++i;
     }
@@ -188,7 +188,7 @@ template<unsigned int np>
 bool RemoteResponseT<np>::validate()
 //-----------------------------------------------------------------------------
 {
-    return ( csum() == computeChecksum() );
+    return ( this->csum() == this->computeChecksum() );
 }
 
 #endif // REMOTEMESSAGES_H
