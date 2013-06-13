@@ -26,6 +26,7 @@ public:
     
 private slots:
     void on_actionConnect_triggered();
+    void on_actionExit_triggered();
 
 private:
     void connectToServer(const QString& ip, int port);

@@ -1,44 +1,49 @@
 //==============================================================================
 // Project  : Lab Monkey
 // Module   : GUI
-// File     : MainWindow.cpp
+// File     : IpPortDlg.cpp
 //==============================================================================
 
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
-#include <QMessageBox>
 #include "IpPortDlg.h"
+#include "ui_IpPortDlg.h"
 
 //==============================================================================
-MainWindow::MainWindow(QWidget *parent)
+IpPortDlg::IpPortDlg(Grape::TcpSocket& socket, QWidget *parent)
 //==============================================================================
-    :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    _client(_transport)
+    : QDialog(parent),
+    _pUi(new Ui::IpPortDlg),
+    _socket(socket)
 {
-    ui->setupUi(this);
+    _pUi->setupUi(this);
 }
 
 //------------------------------------------------------------------------------
-MainWindow::~MainWindow()
+IpPortDlg::~IpPortDlg()
 //------------------------------------------------------------------------------
 {
-    delete ui;
+    delete _pUi;
 }
 
 //------------------------------------------------------------------------------
-void MainWindow::on_actionConnect_triggered()
+void IpPortDlg::on_addressSel_editingFinished()
 //------------------------------------------------------------------------------
 {
-    QDialog* pDlg = new IpPortDlg(_transport, this);
-    pDlg->show();
-    pDlg->exec();
+
 }
 
 //------------------------------------------------------------------------------
-void MainWindow::on_actionExit_triggered()
+void IpPortDlg::on_connectBtn_clicked()
 //------------------------------------------------------------------------------
 {
-    close();
+    _socket.close();
+    bool success = _socket.connect(_pUi->addressSel->text().toStdString(), _pUi->portSel->text().toInt());
+    if( success )
+    {
+        _pUi->statusLbl->setText(QString("Connected to ") + _pUi->addressSel->text());
+    }
+    else
+    {
+        _pUi->statusLbl->setText("No can do");
+    }
+
 }

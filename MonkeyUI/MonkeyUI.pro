@@ -23,24 +23,27 @@ LIBS += -L$${GRAPE_DIR}/lib
 
 CONFIG(debug, release|debug) {
     DEFINES += _DEBUG
-    win32:LIBS += -lws2_32 -lUser32 -lGrapeTimingd0 -lGrapeCored0 -lGrapeIod0 -lGrapeUtilsd0 -llcm
-    else:unix: LIBS += -lGrapeIod -lGrapeTimingd -lGrapeCored -lGrapeUtilsd -llcm -lpthread -lrt
+    win32:LIBS += -lws2_32 -lUser32 -lGrapeTimingd0 -lGrapeCored0 -lGrapeIod0 -lGrapeUtilsd0
+    else:unix: LIBS += -lGrapeIod -lGrapeTimingd -lGrapeCored -lGrapeUtilsd -lpthread -lrt
 } else {
-    win32:LIBS += -lws2_32 -lUser32 -lGrapeTiming0 -lGrapeCore0 -lGrapeIo0 -lGrapeUtils0 -llcm
-    else:unix: LIBS += -lGrapeIo -lGrapeTiming -lGrapeCore -lGrapeUtils -llcm -lpthread -lrt
+    win32:LIBS += -lws2_32 -lUser32 -lGrapeTiming0 -lGrapeCore0 -lGrapeIo0 -lGrapeUtils0
+    else:unix: LIBS += -lGrapeIo -lGrapeTiming -lGrapeCore -lGrapeUtils -lpthread -lrt
 }
 
 
 SOURCES += main.cpp\
         MainWindow.cpp \
     ../MonkeyMessages/MessageFramer.cpp \
-    ConsoleClient.cpp
+    ConsoleClient.cpp \
+    IpPortDlg.cpp
 
 HEADERS  += \
     MainWindow.h \
     ../MonkeyMessages/RemoteMessages.h \
     ../MonkeyMessages/ModeMessages.h \
     ../MonkeyMessages/MessageFramer.h \
-    ConsoleClient.h
+    ConsoleClient.h \
+    IpPortDlg.h
 
-FORMS    += MainWindow.ui
+FORMS    += MainWindow.ui \
+    IpPortDlg.ui

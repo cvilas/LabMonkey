@@ -10,15 +10,15 @@ Design notes:
 
 1. Command server thread (serial port)
 - block waits for remote commands
-- on GET_POSITION command, 
+- on GET_POSITION command,
     -- reads shared memory 'current state buffer' for position
     -- replies to remote client
 - on any other command
-    -- verifies it, 
+    -- verifies it,
     -- copies to shared memory 'desired state buffer'
     -- Adds notification to 'command notification queue'
 - block waits on 'reply notification queue'
-- On reply notification 
+- On reply notification
     -- reads shared memory 'current state buffer'
     -- replies to remote client
 
@@ -43,7 +43,7 @@ Robot thread processes:
 - allows modification of waypoint list
 - Drives LCD (displays mode and immediate status)
 - Drives lamp
-- Drives buzzer 
+- Drives buzzer
 - Reads and sets speed
 
 Implementation steps

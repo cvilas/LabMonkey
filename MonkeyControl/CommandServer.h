@@ -10,7 +10,7 @@
 
 #include "mbed.h"
 #include "EthernetInterface.h"
-#include "../MonkeyMessages/MessageFramer.h"
+#include "./MonkeyMessages/MessageFramer.h"
 #include "C12832_lcd.h"
 
 /// \brief mbed based server for the remote console

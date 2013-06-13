@@ -11,32 +11,32 @@
 bool CommandServer::init(int port)
 //==============================================================================
 {
-    if( !_eth.init() ) // use dhcp
+    if( 0 != _eth.init() )
     {
-        _lcd.printf("\n[CommandServer] ethernet init error");
+        _lcd.printf("\nEthernet init error");
         return false;
     }
 
-    if( !_eth.connect() )
+    if( 0 != _eth.connect() )
     {
-        _lcd.printf("\n[CommandServer] ethernet connect error");
+        _lcd.printf("\nEthernet connect error");
         return false;
     }
 
-    _lcd.printf("\n[CommandServer] IP: %s", _eth.getIPAddress());
+    _lcd.printf("\nIP: %s", _eth.getIPAddress());
 
-    if( !_server.bind(port) )
+    if( 0 != _server.bind(port) )
     {
-        _lcd.printf("\n[CommandServer] server bind error");
+        _lcd.printf("\nServer bind error");
         return false;
     }
 
-    if( !_server.listen() )
+    if( 0 != _server.listen() )
     {
-        _lcd.printf("\n[CommandServer] server listen error");
+        _lcd.printf("\nServer listen error");
         return false;
     }
-
+    _lcd.printf("\nServer ready (%d)", port);
     return true;
 }
 
@@ -50,7 +50,7 @@ void CommandServer::run()
         _server.accept(client);
         client.set_blocking(true);
 
-        _lcd.printf("\n[CommandServer] Connection from: %s\n", client.get_address());
+        _lcd.printf("\nConnection to %s\n", client.get_address());
 
         char sockBuf[256];
 
@@ -98,5 +98,6 @@ void CommandServer::run()
 
             //reply_all
         }
+        client.close();
     }
 }
