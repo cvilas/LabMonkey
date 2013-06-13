@@ -10,7 +10,8 @@
 
 #include "mbed.h"
 #include "EthernetInterface.h"
-#include "rtos.h"
+#include "../MonkeyMessages/MessageFramer.h"
+#include "C12832_lcd.h"
 
 /// \brief mbed based server for the remote console
 /// \ingroup console
@@ -29,17 +30,20 @@
 class CommandServer
 {
 public:
+    CommandServer(C12832_LCD &lcd) : _lcd(lcd) {}
+    ~CommandServer() {}
 
     /// Initialise server and bind to specified port
-    CommandServer(int port);
-
-    ~CommandServer();
+    bool init(int port);
 
     /// Start the server loop
     void run();
 
 private:
-    EthernetInterface _eth;
+    EthernetInterface   _eth;
+    TCPSocketServer     _server;
+    MessageFramer       _framer;
+    C12832_LCD&         _lcd;
 };
 
 

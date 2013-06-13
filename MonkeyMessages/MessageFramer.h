@@ -37,15 +37,18 @@ public:
     /// \param in input message
     /// \param out framed message
     void frame(const std::vector<unsigned char> &in, std::vector<unsigned char> &out);
+    void frame(const unsigned char* inBuf, unsigned int sz, std::vector<unsigned char> &out);
 
     /// unframe. No error checks are performed.
     /// \param in input framed message
     /// \param out unframed message
     void unframe(const std::vector<unsigned char> &in, std::vector<unsigned char> &out);
+    void unframe(const unsigned char* inBuf, unsigned int sz, std::vector<unsigned char> &out);
 
     /// Check if the message is framed properly
     /// \return true if framing is good.
     bool isFramed(const std::vector<unsigned char> & message);
+    bool isFramed(const unsigned char* inBuf, unsigned int sz);
 };
 
 #endif // MESSAGEFRAMER_H

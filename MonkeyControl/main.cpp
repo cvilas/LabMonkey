@@ -1,8 +1,8 @@
 
 #include "mbed.h"
 #include "rtos.h"
-
-#include "RemoteMessages.h"
+#include "C12832_lcd.h"
+#include "CommandServer.h"
 #include <vector>
 
 /*
@@ -60,13 +60,15 @@ Implementation steps
 11. Desktop GUI test
 12. Tablet GUI test
 */
-
-#include "CommandServer.h"
+C12832_LCD lcd;
 
 void command_thread(void const* arg)
 {
-    CommandServer cs(1234);
-    cs.run();
+    CommandServer cs(lcd);
+    if( cs.init(1234) )
+    {
+        cs.run();
+    }
 }
 
 int main()

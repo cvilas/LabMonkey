@@ -9,16 +9,22 @@
 //==============================================================================
 void MessageFramer::frame(const std::vector<unsigned char> &in,
                           std::vector<unsigned char> &out)
+{
+    frame(&in[0], in.size(), out);
+}
+
+//==============================================================================
+void MessageFramer::frame(const unsigned char* inBuf, unsigned int sz, std::vector<unsigned char> &out)
 //==============================================================================
 {
     out.clear();
-    out.reserve(in.size()+2); // we will need at least these many
+    out.reserve(sz+2); // we will need at least these many
 
     out.push_back(START_BYTE);
-    std::vector<unsigned char>::const_iterator it = in.begin();
-    while( it != in.end() )
+    unsigned int i = 0;
+    while( i < sz )
     {
-        unsigned char b = *it;
+        unsigned char b = inBuf[i];
         if( b == START_BYTE || b == END_BYTE || b == STUFF_BYTE )
         {
             out.push_back(STUFF_BYTE);
@@ -28,7 +34,7 @@ void MessageFramer::frame(const std::vector<unsigned char> &in,
         {
             out.push_back(b);
         }
-        ++it;
+        ++i;
     }
     out.push_back(END_BYTE);
 }
@@ -38,17 +44,24 @@ void MessageFramer::unframe(const std::vector<unsigned char> &in,
                             std::vector<unsigned char> &out)
 //------------------------------------------------------------------------------
 {
-    unsigned int iLast = in.size()-1;
+    unframe(&in[0], in.size(), out);
+}
+
+//------------------------------------------------------------------------------
+void MessageFramer::unframe(const unsigned char* inBuf, unsigned int sz, std::vector<unsigned char> &out)
+//------------------------------------------------------------------------------
+{
+    unsigned int iLast = sz-1;
     out.clear();
     out.reserve(iLast-1);
 
     for( unsigned int i = 1; i < iLast; ++i )
     {
-        unsigned char b = in[i];
+        unsigned char b = inBuf[i];
         if( b == STUFF_BYTE )
         {
             ++i;
-            b = 0xFF&(in[i] - STUFF_BYTE);
+            b = 0xFF&(inBuf[i] - STUFF_BYTE);
         }
         out.push_back(b);
     }
@@ -58,16 +71,23 @@ void MessageFramer::unframe(const std::vector<unsigned char> &in,
 bool MessageFramer::isFramed(const std::vector<unsigned char> & message)
 //------------------------------------------------------------------------------
 {
-    unsigned int iLast = message.size()-1;
+    return isFramed(&message[0], message.size());
+}
 
-    if( (message[0] != START_BYTE) || (message[iLast] != END_BYTE) )
+//------------------------------------------------------------------------------
+bool MessageFramer::isFramed(const unsigned char* inBuf, unsigned int sz)
+//------------------------------------------------------------------------------
+{
+    unsigned int iLast = sz-1;
+
+    if( (inBuf[0] != START_BYTE) || (inBuf[iLast] != END_BYTE) )
     {
         return false;
     }
 
     for( unsigned int i = 1; i < iLast; ++i )
     {
-        unsigned char b = message[i];
+        unsigned char b = inBuf[i];
         if( (b == START_BYTE) || (b == END_BYTE) )
         {
             return false;
@@ -83,7 +103,7 @@ bool MessageFramer::isFramed(const std::vector<unsigned char> & message)
                 return false;
             }
 
-            b = 0xFF&(message[i] - STUFF_BYTE);
+            b = 0xFF&(inBuf[i] - STUFF_BYTE);
             if( (b != START_BYTE) && (b != END_BYTE) && (b != STUFF_BYTE) )
             {
                 return false;

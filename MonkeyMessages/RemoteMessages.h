@@ -64,6 +64,7 @@ public:
 public:
     virtual unsigned char* bytes() const = 0;
     virtual unsigned int size() const = 0;
+    static inline unsigned char computeChecksum(const unsigned char* pBuf, unsigned int len);
 
 protected:
     RemoteMessage();
@@ -143,17 +144,22 @@ public:
 }; // RemoteResponse
 
 //-----------------------------------------------------------------------------
-unsigned char RemoteMessage::computeChecksum()
+unsigned char RemoteMessage::computeChecksum(const unsigned char* pBuf, unsigned int len)
 //-----------------------------------------------------------------------------
 {
     unsigned int csum = 0;
-    unsigned int end = size()-1; // ignore first byte and the last two bytes
-    unsigned char* pBytes = bytes();
-    for( unsigned int i = 0; i < end; ++i )
+    for( unsigned int i = 0; i < len; ++i )
     {
-        csum += (unsigned int)(pBytes[i]);
+        csum += (unsigned int)(pBuf[i]);
     }
     return( (unsigned char)(csum&0xFF));
+}
+
+//-----------------------------------------------------------------------------
+unsigned char RemoteMessage::computeChecksum()
+//-----------------------------------------------------------------------------
+{
+    return computeChecksum(bytes(), size()-1/*all except last byte*/);
 }
 
 //-----------------------------------------------------------------------------
