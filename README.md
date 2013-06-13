@@ -1,4 +1,4 @@
-MonkeyUI
+LabMonkey
 ========
 
-GUI for the Lab Monkey robotic arm
+GUI and remote console bits for the Lab Monkey robotic arm
