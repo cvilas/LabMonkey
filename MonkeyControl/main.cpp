@@ -60,7 +60,8 @@ Implementation steps
 11. Desktop GUI test
 12. Tablet GUI test
 */
-C12832_LCD lcd;
+C12832_LCD          lcd;
+EthernetInterface   eth;
 
 void command_thread(void const* arg)
 {
@@ -73,6 +74,22 @@ void command_thread(void const* arg)
 
 int main()
 {
+    // initialise ethernet
+    if( 0 != eth.init() )
+    {
+        lcd.printf("\nEthernet init error");
+        while(1){};
+    }
+
+    if( 0 != eth.connect() )
+    {
+        lcd.printf("\nEthernet connect error");
+        while(1){};
+    }
+
+    lcd.printf("\nIP: %s", eth.getIPAddress());
+
+    // command thread
     Thread commandserver(command_thread);
 
     while(1)

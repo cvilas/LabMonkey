@@ -11,20 +11,6 @@
 bool CommandServer::init(int port)
 //==============================================================================
 {
-    if( 0 != _eth.init() )
-    {
-        _lcd.printf("\nEthernet init error");
-        return false;
-    }
-
-    if( 0 != _eth.connect() )
-    {
-        _lcd.printf("\nEthernet connect error");
-        return false;
-    }
-
-    _lcd.printf("\nIP: %s", _eth.getIPAddress());
-
     if( 0 != _server.bind(port) )
     {
         _lcd.printf("\nServer bind error");

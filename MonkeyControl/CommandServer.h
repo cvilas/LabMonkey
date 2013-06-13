@@ -10,7 +10,7 @@
 
 #include "mbed.h"
 #include "EthernetInterface.h"
-#include "./MonkeyMessages/MessageFramer.h"
+#include "MessageFramer.h"
 #include "C12832_lcd.h"
 
 /// \brief mbed based server for the remote console
@@ -40,7 +40,6 @@ public:
     void run();
 
 private:
-    EthernetInterface   _eth;
     TCPSocketServer     _server;
     MessageFramer       _framer;
     C12832_LCD&         _lcd;
