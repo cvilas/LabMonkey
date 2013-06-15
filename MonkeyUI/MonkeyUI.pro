@@ -35,7 +35,8 @@ SOURCES += main.cpp\
         MainWindow.cpp \
     ../MonkeyMessages/MessageFramer.cpp \
     ConsoleClient.cpp \
-    IpPortDlg.cpp
+    IpPortDlg.cpp \
+    ModeSelectUi.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -43,7 +44,9 @@ HEADERS  += \
     ../MonkeyMessages/ModeMessages.h \
     ../MonkeyMessages/MessageFramer.h \
     ConsoleClient.h \
-    IpPortDlg.h
+    IpPortDlg.h \
+    ModeSelectUi.h
 
 FORMS    += MainWindow.ui \
-    IpPortDlg.ui
+    IpPortDlg.ui \
+    ModeSelectUi.ui

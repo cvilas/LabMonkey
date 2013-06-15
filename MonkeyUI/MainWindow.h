@@ -9,7 +9,9 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
 #include "ConsoleClient.h"
+#include "ModeSelectUi.h"
 #include <io/TcpSocket.h>
 
 namespace Ui {
@@ -25,16 +27,15 @@ public:
     ~MainWindow();
     
 private slots:
-    void on_actionConnect_triggered();
+    void on_actionTcpConnect_triggered();
     void on_actionExit_triggered();
 
 private:
-    void connectToServer(const QString& ip, int port);
-
-private:
-    Ui::MainWindow *ui;
-    Grape::TcpSocket _transport;
-    ConsoleClient _client;
+    Ui::MainWindow *_pUi;
+    QLabel* _pConnectionStatus;
+    QLabel* _pErrorInfo;
+    ConsoleClient _messenger;
+    ModeSelectUi _modeSelect;
 }; // MainWindow
 
 #endif // MAINWINDOW_H

@@ -1,59 +1,45 @@
 //==============================================================================
 // Project  : Lab Monkey
 // Module   : GUI
-// File     : IpPortDlg.cpp
+// File     : ModeSelectUi.cpp
 //==============================================================================
 
-#include "IpPortDlg.h"
-#include "ui_IpPortDlg.h"
-#include <QDebug>
-#include <errno.h>
+#include "ModeSelectUi.h"
+#include "ui_ModeSelectUi.h"
 
 //==============================================================================
-IpPortDlg::IpPortDlg(QWidget *parent)
+ModeSelectUi::ModeSelectUi(ConsoleClient& client, QWidget *parent)
 //==============================================================================
-    : QDialog(parent),
-    _pUi(new Ui::IpPortDlg),
-    _pSocket(NULL)
+    : QWidget(parent),
+    _pUi(new Ui::ModeSelectUi),
+    _messenger(client)
 {
     _pUi->setupUi(this);
 }
 
 //------------------------------------------------------------------------------
-IpPortDlg::~IpPortDlg()
+ModeSelectUi::~ModeSelectUi()
 //------------------------------------------------------------------------------
 {
     delete _pUi;
 }
 
 //------------------------------------------------------------------------------
-void IpPortDlg::on_addressSel_editingFinished()
+void ModeSelectUi::on_teachModeBtn_clicked()
 //------------------------------------------------------------------------------
 {
+    RemoteMessage::Mode m = _messenger.setMode(RemoteMessage::MODE_TEACH);
 
+    /// \todo
+    /// handle reply
 }
 
 //------------------------------------------------------------------------------
-void IpPortDlg::on_connectBtn_clicked()
+void ModeSelectUi::on_replayModeBtn_clicked()
 //------------------------------------------------------------------------------
 {
-    if( _pSocket )
-    {
-        _pSocket->close();
-        _pSocket = NULL;
-    }
+    RemoteMessage::Mode m = _messenger.setMode(RemoteMessage::MODE_TEACH);
 
-    _pSocket = new Grape::TcpSocket;
-    bool success = _pSocket->connect(_pUi->addressSel->text().toStdString(), _pUi->portSel->text().toInt());
-    if( success )
-    {
-        _pUi->statusLbl->setText("Connected");
-    }
-    else
-    {
-        delete _pSocket;
-        _pSocket = NULL;
-        _pUi->statusLbl->setText("Unable");
-    }
-
+    /// \todo
+    /// handle reply
 }

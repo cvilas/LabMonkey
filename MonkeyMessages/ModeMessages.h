@@ -62,12 +62,12 @@ public:
     /// verifies message ID is correct.
     virtual bool validate()
     {
-        RemoteMessage::MessageID id = id();
+        RemoteMessage::MessageID m = id();
         return RemoteResponseT<1>::validate() &&
-                ( (id == RemoteMessage::SET_MODE) || (id == RemoteMessage::GET_MODE));
+                ( (m == RemoteMessage::SET_MODE) || (m == RemoteMessage::GET_MODE));
     }
 
-    RemoteMessage::Mode mode() { return _bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
+    RemoteMessage::Mode mode() { return (RemoteMessage::Mode)_bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
 }; // ModeResponse
 
 #endif // MODEMESSAGES_H

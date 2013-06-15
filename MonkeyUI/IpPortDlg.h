@@ -15,14 +15,16 @@ namespace Ui {
 class IpPortDlg;
 }
 
+//==============================================================================
 /// \brief connects to remote TCP host
 class IpPortDlg : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit IpPortDlg(Grape::TcpSocket& socket, QWidget *parent = 0);
+    explicit IpPortDlg(QWidget *parent = 0);
     ~IpPortDlg();
+    Grape::TcpSocket* getSocket() { return _pSocket; }
     
 private slots:
     void on_addressSel_editingFinished();
@@ -30,7 +32,7 @@ private slots:
 
 private:
     Ui::IpPortDlg *_pUi;
-    Grape::TcpSocket& _socket;
+    Grape::TcpSocket* _pSocket;
 };
 
 #endif // IPPORTDLG_H

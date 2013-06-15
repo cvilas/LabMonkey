@@ -29,25 +29,45 @@ public:
     static const unsigned int START_BYTE    = 0x02; // ascii STX
     static const unsigned int END_BYTE      = 0x03; // ascii ETX
     static const unsigned int STUFF_BYTE    = 0x10; // ascii DLE
+
 public:
     MessageFramer() {}
     ~MessageFramer() {}
 
+    /// \return size of framed message, given unframed message
+    unsigned int computeFramedSize(const unsigned char* inBuf, unsigned int sz);
+
+    /// \return size of unframed message, given framed message
+    unsigned int computeUnFramedSize(const unsigned char* inBuf, unsigned int sz);
+
     /// frame. no error checks are performed.
-    /// \param in input message
-    /// \param out framed message
-    void frame(const std::vector<unsigned char> &in, std::vector<unsigned char> &out);
-    void frame(const unsigned char* inBuf, unsigned int sz, std::vector<unsigned char> &out);
+    /// \param inBuf input message
+    /// \param inSize input message size
+    /// \param outBuf framed message
+    void frame(const unsigned char* inBuf, unsigned int inSize, std::vector<unsigned char> &outBuf);
+
+    /// frame. no error checks are performed.
+    /// \param inBuf input message
+    /// \param inSize input message size
+    /// \param outBuf buffer for framed message
+    /// \param outSize output buffer size
+    void frame(const unsigned char* inBuf, unsigned int inSize, unsigned char* outBuf, unsigned int outSize);
 
     /// unframe. No error checks are performed.
-    /// \param in input framed message
-    /// \param out unframed message
-    void unframe(const std::vector<unsigned char> &in, std::vector<unsigned char> &out);
-    void unframe(const unsigned char* inBuf, unsigned int sz, std::vector<unsigned char> &out);
+    /// \param inBuf input framed message
+    /// \param outBuf buffer for unframed message
+    /// \param outSize size of output buffer
+    void unframe(const std::vector<unsigned char> &inBuf, unsigned char* outBuf, unsigned int outSize);
+
+    /// unframe. No error checks are performed.
+    /// \param inBuf input framed message
+    /// \param inSize input buffer size
+    /// \param outBuf buffer for unframed message
+    /// \param outSize size of output buffer
+    void unframe(const unsigned char* inBuf, unsigned int inSize, unsigned char* outBuf, unsigned int outSize);
 
     /// Check if the message is framed properly
     /// \return true if framing is good.
-    bool isFramed(const std::vector<unsigned char> & message);
     bool isFramed(const unsigned char* inBuf, unsigned int sz);
 };
 

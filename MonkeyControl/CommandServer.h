@@ -8,10 +8,8 @@
 #ifndef COMMAND_SERVER_H
 #define COMMAND_SERVER_H
 
-#include "mbed.h"
-#include "EthernetInterface.h"
+#include "AppBoard.h"
 #include "MessageFramer.h"
-#include "C12832_lcd.h"
 
 /// \brief mbed based server for the remote console
 /// \ingroup console
@@ -30,19 +28,25 @@
 class CommandServer
 {
 public:
-    CommandServer(C12832_LCD &lcd) : _lcd(lcd) {}
+    CommandServer() {}
     ~CommandServer() {}
 
     /// Initialise server and bind to specified port
     bool init(int port);
 
+    /// receive message
+    /// \param transport data transfer mechanism
+    /// \param buffer buffer to put message in
+    /// \param bufferLen length of above buffer
+    /// \return -1 on error. Number of bytes in the message on success
+    int receive(TCPSocketConnection& transport, unsigned char* buffer, unsigned int bufferLen);
+
     /// Start the server loop
     void run();
 
 private:
-    TCPSocketServer     _server;
-    MessageFramer       _framer;
-    C12832_LCD&         _lcd;
+    TCPSocketServer _server;
+    MessageFramer   _framer;
 };
 
 

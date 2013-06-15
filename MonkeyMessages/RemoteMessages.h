@@ -62,12 +62,12 @@ public:
     static const unsigned int PAYLOAD_LENGTH_INDEX  = 1;
 
 public:
-    virtual unsigned char* bytes() const = 0;
+    virtual unsigned char* bytes() = 0;
     virtual unsigned int size() const = 0;
     static inline unsigned char computeChecksum(const unsigned char* pBuf, unsigned int len);
 
 protected:
-    RemoteMessage();
+    RemoteMessage() {}
     virtual ~RemoteMessage() {}
     inline unsigned char computeChecksum();
 }; // RemoteMessage
@@ -83,9 +83,8 @@ template<unsigned int nPayloadBytes>
 class RemoteMessageT : public RemoteMessage
 {
 public:
-
-    virtual unsigned char* bytes() const { return _bytes; }
     virtual unsigned int size() const { return nPayloadBytes + 5; }
+    virtual unsigned char* bytes() { return _bytes; }
     unsigned int payloadLength() const { return nPayloadBytes; }
 
     MessageID id() const { return MessageID(_bytes[RemoteMessage::ID_INDEX]&0xFF); }

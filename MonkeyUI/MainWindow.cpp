@@ -12,28 +12,28 @@
 //==============================================================================
 MainWindow::MainWindow(QWidget *parent)
 //==============================================================================
-    :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    _client(_transport)
+    : QMainWindow(parent),
+    _pUi(new Ui::MainWindow),
+    _modeSelect(_messenger)
 {
-    ui->setupUi(this);
+    _pUi->setupUi(this);
+
+    _pConnectionStatus = new QLabel;
+    _pErrorInfo = new QLabel;
+    _pUi->statusBar->addWidget(_pConnectionStatus);
+    _pUi->statusBar->addWidget(_pErrorInfo);
+
+    this->setCentralWidget(&_modeSelect);
 }
 
 //------------------------------------------------------------------------------
 MainWindow::~MainWindow()
 //------------------------------------------------------------------------------
 {
-    delete ui;
-}
-
-//------------------------------------------------------------------------------
-void MainWindow::on_actionConnect_triggered()
-//------------------------------------------------------------------------------
-{
-    QDialog* pDlg = new IpPortDlg(_transport, this);
-    pDlg->show();
-    pDlg->exec();
+    _messenger.setTransport(NULL);
+    delete _pConnectionStatus;
+    delete _pErrorInfo;
+    delete _pUi;
 }
 
 //------------------------------------------------------------------------------
@@ -41,4 +41,26 @@ void MainWindow::on_actionExit_triggered()
 //------------------------------------------------------------------------------
 {
     close();
+}
+
+//------------------------------------------------------------------------------
+void MainWindow::on_actionTcpConnect_triggered()
+//------------------------------------------------------------------------------
+{
+    IpPortDlg* pDlg = new IpPortDlg(this);
+    pDlg->show();
+    pDlg->exec();
+
+    Grape::TcpSocket* pSocket = pDlg->getSocket();
+    if( pSocket == NULL )
+    {
+        _pConnectionStatus->setText("Not Connected");
+        _messenger.setTransport(NULL);
+    }
+    else
+    {
+        _pConnectionStatus->setText(QString("connected to ") + QString(pSocket->getPeerName().c_str()) );
+        _messenger.setTransport(pSocket);
+    }
+
 }
