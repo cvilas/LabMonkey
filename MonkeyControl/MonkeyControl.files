@@ -265,3 +265,7 @@ AppBoard.h
 AppBoard.cpp
 config.h
 design_notes.txt
+DesiredState.h
+CurrentState.h
+RobotController.h
+RobotController.cpp

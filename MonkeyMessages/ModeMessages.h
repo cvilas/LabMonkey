@@ -40,7 +40,7 @@ class GetModeCommand : public RemoteCommandT<0>
 {
 public:
     GetModeCommand() { initialise(RemoteMessage::GET_MODE, 0, NULL); }
-    ~GetModeCommand() {}
+    virtual ~GetModeCommand() {}
 }; // GetModeCommand
 
 
@@ -49,25 +49,28 @@ public:
 ///
 /// Message format:
 /// \code
-/// [SET_MODE or GET_MODE][1][Mode][CSUM]
+/// [GET_MODE][1][Mode][CSUM]
 /// \endcode
 /// \see SetModeCommand, GetModeCommand
 class ModeResponse : public RemoteResponseT<1>
 {
 public:
-    ModeResponse() {}
+    ModeResponse()
+    {
+        unsigned char d = RemoteMessage::MODE_UNKNOWN;
+        initialise(RemoteMessage::GET_MODE, 1, &d);
+    }
     virtual ~ModeResponse() {}
 
     /// Calls base class method of same name and additionally
     /// verifies message ID is correct.
     virtual bool validate()
     {
-        RemoteMessage::MessageID m = id();
-        return RemoteResponseT<1>::validate() &&
-                ( (m == RemoteMessage::SET_MODE) || (m == RemoteMessage::GET_MODE));
+        return RemoteResponseT<1>::validate() && (id() == RemoteMessage::GET_MODE);
     }
 
-    RemoteMessage::Mode mode() { return (RemoteMessage::Mode)_bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
+    RemoteMessage::Mode getMode() { return (RemoteMessage::Mode)_bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
+    void setMode(RemoteMessage::Mode m) { _bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1] = m; setModified(); }
 }; // ModeResponse
 
 #endif // MODEMESSAGES_H

@@ -1,6 +1,7 @@
 #include "config.h"
 #include "AppBoard.h"
 #include "CommandServer.h"
+#include "RobotController.h"
 #include "rtos.h"
 
 
@@ -12,6 +13,17 @@ void command_thread(void const* arg)
     if( cs.init(SERVER_PORT) )
     {
         cs.run();
+    }
+}
+
+//=============================================================================
+void robot_thread(void const* arg)
+//=============================================================================
+{
+    RobotController rc;
+    if( rc.init() )
+    {
+        rc.run();
     }
 }
 
@@ -31,6 +43,9 @@ int main()
 
     // command thread
     Thread commandserver(command_thread);
+
+    // Robot control thread
+    Thread robotcontroller(robot_thread);
 
     while(1)
     {

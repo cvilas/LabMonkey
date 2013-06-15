@@ -11,6 +11,9 @@
 #include "mbed.h"
 #include "C12832_lcd.h"
 #include "EthernetInterface.h"
+#include "DesiredState.h"
+#include "CurrentState.h"
+#include "Queue.h"
 
 /// \brief singleton accessor for hardware io on the mbed application board
 class AppBoard
@@ -28,6 +31,19 @@ public:
     static C12832_LCD& lcd() { return singleton()._lcd; }
     static EthernetInterface& eth() { return singleton()._eth; }
 
+    static DesiredState& desiredState() { return singleton()._desiredState; }
+    static CurrentState& currentState() { return singleton()._currentState; }
+
+    /// queue of pending commands. Robot control thread does the following
+    /// - check the queue for pending command id
+    /// - read and destroy the pending command id (call delete on pointer returned by get)
+    /// - update currentState depending on command id
+    /// - Append the command id to pendingResponses queue to notify command server
+    /// Note: delete any items taken off the queue (call delete)
+    static rtos::Queue<RemoteMessage::MessageID, 1>& pendingCommand() { return singleton()._pendingCommand; }
+
+    static rtos::Queue<RemoteMessage::MessageID, 1>& pendingReply() { return singleton()._pendingReply; }
+
     static bool initEthernet();
 private:
     AppBoard();
@@ -36,6 +52,12 @@ private:
 public:
     C12832_LCD          _lcd;
     EthernetInterface   _eth;
+
+    DesiredState _desiredState;
+    CurrentState _currentState;
+
+    rtos::Queue<RemoteMessage::MessageID, 1> _pendingCommand;
+    rtos::Queue<RemoteMessage::MessageID, 1> _pendingReply;
 };
 
 //------------------------------------------------------------------------------

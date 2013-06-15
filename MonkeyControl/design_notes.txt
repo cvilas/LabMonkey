@@ -1,5 +1,9 @@
-/*
 Design notes:
+=============
+
+1. AppBoard class   : singleton class provides access to hardware IO on the mbed application board
+2. CommandServer    : serves remote console commands. interacts with shared memory area
+3.
 
 1. Command server thread (serial port)
 - block waits for remote commands

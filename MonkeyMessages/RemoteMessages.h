@@ -94,6 +94,17 @@ protected:
     RemoteMessageT() : RemoteMessage() {}
     virtual ~RemoteMessageT() {}
 
+    /// Create message given message code and payload
+    /// \param id Command id (RemoteMessage::MessageID)
+    /// \param len Number of bytes in the above payload buffer(0-255).
+    ///             - If the len > size(), only size() elements are copied.
+    ///             - If len < size(), [len - size()-1] elements are set to 0.
+    /// \param pPayloadData Pointer to buffer containing *payload* data.
+    void initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char* pPayloadData);
+
+    /// Derived classes must always call this method whenever it modifies the message buffer in any way.
+    void setModified() { this->_bytes[this->size()-1] = this->computeChecksum(); }
+
 protected:
     unsigned char _bytes[nPayloadBytes + 3/*ID, N, CSUM*/];
 }; // RemoteMessage
@@ -108,18 +119,6 @@ class RemoteCommandT : public RemoteMessageT<nPayloadBytes>
 protected:
     RemoteCommandT() : RemoteMessageT<nPayloadBytes>() {}
     virtual ~RemoteCommandT() {}
-
-    /// Create command message given message code and payload
-    /// \param id Command id (RemoteMessage::MessageID)
-    /// \param len Number of bytes in the above payload buffer(0-255).
-    ///             - If the len > size(), only size() elements are copied.
-    ///             - If len < size(), [len - size()-1] elements are set to 0.
-    /// \param pPayloadData Pointer to buffer containing *payload* data.
-    void initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char* pPayloadData);
-
-    /// Derived classes must always call this method whenever it modifies the command
-    /// message buffer in any way.
-    void setCommandModified() { this->_bytes[this->size()-1] = this->computeChecksum(); }
 
 }; // RemoteCommand
 
@@ -163,7 +162,7 @@ unsigned char RemoteMessage::computeChecksum()
 
 //-----------------------------------------------------------------------------
 template<unsigned int np>
-void RemoteCommandT<np>::initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char *pPayloadData)
+void RemoteMessageT<np>::initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char *pPayloadData)
 //-----------------------------------------------------------------------------
 {
     this->_bytes[RemoteMessage::ID_INDEX] = id;
@@ -185,7 +184,7 @@ void RemoteCommandT<np>::initialise(RemoteMessage::MessageID id, unsigned int le
         ++i;
     }
 
-    setCommandModified();
+    this->setModified();
 }
 
 //-----------------------------------------------------------------------------

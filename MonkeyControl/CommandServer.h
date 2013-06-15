@@ -26,7 +26,12 @@
 /// - Waits for robot controller thread to respond
 /// - Replies to the remote console when a response becomes available
 class CommandServer
-{
+{   
+public:
+    static const int COMM_ERROR = -1;   //!< console transport error
+    static const int MSG_ERROR = -2;    //!< console message format error
+    static const int IPC_ERROR = -3;    //!< error in internal message passing between threads
+
 public:
     CommandServer() {}
     ~CommandServer() {}
@@ -34,15 +39,34 @@ public:
     /// Initialise server and bind to specified port
     bool init(int port);
 
-    /// receive message
+    /// receive message from remote host
     /// \param transport data transfer mechanism
     /// \param buffer buffer to put message in
     /// \param bufferLen length of above buffer
-    /// \return -1 on error. Number of bytes in the message on success
+    /// \return COMM_ERROR, MSG_ERROR, or number of valid bytes in the message
     int receive(TCPSocketConnection& transport, unsigned char* buffer, unsigned int bufferLen);
+
+    /// process and command
+    /// \param pCmd command buffer
+    /// \param cmdLen length of the command
+    /// \param pRespBuf response buffer
+    /// \param respBufLen size of the above buffer
+    /// \return -1 on error, number of valid bytes in response buffer on success.
+    int process(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+
+    /// respond to remote host
+    /// \param transport data transfer mechanism
+    /// \param buffer buffer containing response
+    /// \param len length of the response
+    /// \return COMM_ERROR, MSG_ERROR, or 0 on success
+    int respond(TCPSocketConnection& transport, unsigned char* buffer, unsigned int len);
 
     /// Start the server loop
     void run();
+
+private:
+    int processSetMode(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+    int processGetMode(unsigned char* pRespBuf, unsigned int respBufLen);
 
 private:
     TCPSocketServer _server;

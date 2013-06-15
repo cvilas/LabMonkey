@@ -63,7 +63,7 @@ RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
     unsigned int bytesReceived = _pTransport->readAll(framedMsg);
 
     // check framing
-    if( _framer.isFramed(&framedMsg[0], bytesReceived) )
+    if( !_framer.isFramed(&framedMsg[0], bytesReceived) )
     {
         qDebug() << "[ConsoleClient::setMode] Response frame error";
         return RemoteMessage::MODE_UNKNOWN;
@@ -87,7 +87,7 @@ RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
         return RemoteMessage::MODE_UNKNOWN;
     }
 
-    return expectedResponse.mode();
+    return expectedResponse.getMode();
 }
 
 //------------------------------------------------------------------------------
