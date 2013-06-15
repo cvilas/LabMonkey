@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>MonkeyUI</string>
   </property>
   <widget class="QWidget" name="centralWidget"/>
   <widget class="QMenuBar" name="menuBar">
@@ -23,14 +23,14 @@
      <height>23</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuConnect">
     <property name="title">
-     <string>File</string>
+     <string>Connect</string>
     </property>
-    <addaction name="actionConnect"/>
+    <addaction name="actionTcpConnect"/>
     <addaction name="actionExit"/>
    </widget>
-   <addaction name="menuFile"/>
+   <addaction name="menuConnect"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -41,9 +41,9 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionConnect">
+  <action name="actionTcpConnect">
    <property name="text">
-    <string>Connect</string>
+    <string>TCP Connection</string>
    </property>
   </action>
   <action name="actionExit">
