@@ -83,7 +83,7 @@ template<unsigned int nPayloadBytes>
 class RemoteMessageT : public RemoteMessage
 {
 public:
-    virtual unsigned int size() const { return nPayloadBytes + 5; }
+    virtual unsigned int size() const { return nPayloadBytes + 3; }
     virtual unsigned char* bytes() { return _bytes; }
     unsigned int payloadLength() const { return nPayloadBytes; }
 

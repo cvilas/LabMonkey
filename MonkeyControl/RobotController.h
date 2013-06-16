@@ -1,6 +1,6 @@
 //==============================================================================
 // Project  : Lab Monkey
-// Module   : console
+// Module   : robot
 // File     : RobotController.h
 // Brief    : robot controller class
 //==============================================================================
@@ -16,6 +16,10 @@ public:
 
     bool init();
     void run();
+
+private:
+    void processConsoleCommand();
+    void processConsoleCommandSetMode();
 };
 
 #endif // ROBOT_CONTROLLER_H

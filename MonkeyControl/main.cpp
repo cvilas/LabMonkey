@@ -38,7 +38,7 @@ int main()
         while(1){}
     }
 
-    AppBoard::lcd().locate(AppBoard::DISP_ID_LOC_X, AppBoard::DISP_ID_LOC_Y);
+    AppBoard::lcd().locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
     AppBoard::lcd().printf("IP: %s", AppBoard::eth().getIPAddress());
 
     // command thread

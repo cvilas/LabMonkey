@@ -1,6 +1,6 @@
 //==============================================================================
 // Project  : Lab Monkey
-// Module   : console
+// Module   : robot
 // File     : RobotController.cpp
 //==============================================================================
 
@@ -23,6 +23,8 @@ RobotController::~RobotController()
 bool RobotController::init()
 //------------------------------------------------------------------------------
 {
+    //todo: do all initialisations here
+
     return true;
 }
 
@@ -30,28 +32,59 @@ bool RobotController::init()
 void RobotController::run()
 //------------------------------------------------------------------------------
 {
-    // check pending command
-    // process it
-    // notify completion
-
     while(1)
     {
+        // todo: read app board io
 
-        // example
-        osEvent evt = AppBoard::pendingCommand().get(0);
-        if( evt.status == osEventMessage )
+        // check for pending command from console and process it
+        if( AppBoard::isConsoleActive() )
         {
-            RemoteMessage::MessageID* id = (RemoteMessage::MessageID*)evt.value.p;
-
-            if( *id == RemoteMessage::SET_MODE )
-            {
-                RemoteMessage::MessageID* reply = new RemoteMessage::MessageID;
-                *reply = *id;
-                AppBoard::pendingReply().put(reply);
-            }
-            delete id;
+            processConsoleCommand();
         }
 
+        // todo: do motor control
+
+        // todo: update 'AppBoard::currentState'
     }
 
+}
+
+//------------------------------------------------------------------------------
+void RobotController::processConsoleCommand()
+//------------------------------------------------------------------------------
+{
+    // check if a console command is waiting..
+    osEvent evt = AppBoard::pendingCommand().get(0);
+
+    // yes..
+    if( evt.status == osEventMessage )
+    {
+        RemoteMessage::MessageID* id = (RemoteMessage::MessageID*)evt.value.p;
+
+        switch(*id)
+        {
+        case RemoteMessage::SET_MODE:
+            processConsoleCommandSetMode();
+            break;
+        default:
+            break;
+        };
+
+        // release notification memory
+        delete id;
+    }
+
+}
+
+//------------------------------------------------------------------------------
+void RobotController::processConsoleCommandSetMode()
+//------------------------------------------------------------------------------
+{
+
+    // todo: actually set mode and update AppBoard::currentState
+
+    // notify console
+    RemoteMessage::MessageID* reply = new RemoteMessage::MessageID;
+    *reply = RemoteMessage::SET_MODE;
+    AppBoard::pendingReply().put(reply);
 }

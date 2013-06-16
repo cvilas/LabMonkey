@@ -21,18 +21,19 @@ class AppBoard
 public:
     static inline AppBoard& singleton();
 
-    static const int DISP_ID_LOC_X = 0;     //!< X location for identifier message on LCD
-    static const int DISP_ID_LOC_Y = 0;     //!< Y location for identifier message on LCD
     static const int DISP_INFO_LOC_X = 0;     //!< X location for info message on LCD
-    static const int DISP_INFO_LOC_Y = 1;     //!< Y location for info message on LCD
+    static const int DISP_INFO_LOC_Y = 0;     //!< Y location for info message on LCD
     static const int DISP_ERR_LOC_X = 0;    //!< X location for error message on LCD
-    static const int DISP_ERR_LOC_Y = 2;   //!< Y location for error message on LCD
+    static const int DISP_ERR_LOC_Y = 1;   //!< Y location for error message on LCD
 
     static C12832_LCD& lcd() { return singleton()._lcd; }
     static EthernetInterface& eth() { return singleton()._eth; }
 
     static DesiredState& desiredState() { return singleton()._desiredState; }
     static CurrentState& currentState() { return singleton()._currentState; }
+
+    static bool isConsoleActive() { return singleton()._isConsoleActive; }
+    static void setConsoleActive(bool option) { singleton()._isConsoleActive = option; }
 
     /// queue of pending commands. Robot control thread does the following
     /// - check the queue for pending command id
@@ -50,6 +51,8 @@ private:
     ~AppBoard();
 
 public:
+    bool                _isConsoleActive;
+
     C12832_LCD          _lcd;
     EthernetInterface   _eth;
 

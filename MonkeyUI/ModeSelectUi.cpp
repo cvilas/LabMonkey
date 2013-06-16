@@ -6,6 +6,7 @@
 
 #include "ModeSelectUi.h"
 #include "ui_ModeSelectUi.h"
+#include <QDebug>
 
 //==============================================================================
 ModeSelectUi::ModeSelectUi(ConsoleClient& client, QWidget *parent)

@@ -71,10 +71,11 @@ RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
 
     // unframe it
     ModeResponse expectedResponse;
+    unsigned int expSz = expectedResponse.size();
     unsigned int unframedSz = _framer.computeUnFramedSize(&framedMsg[0], bytesReceived);
-    if( unframedSz != expectedResponse.size() )
+    if( unframedSz != expSz )
     {
-        qDebug() << "[ConsoleClient::setMode] Response size error";
+        qDebug() << "[ConsoleClient::setMode] Response size error. Expected " << expSz << " got " << unframedSz;
         return RemoteMessage::MODE_UNKNOWN;
     }
 

@@ -26,7 +26,7 @@ bool CommandServer::init(int port)
         return false;
     }
 
-    AppBoard::lcd().locate(AppBoard::DISP_ID_LOC_X, AppBoard::DISP_ID_LOC_Y);
+    AppBoard::lcd().locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
     AppBoard::lcd().printf("I am %s:%d", AppBoard::eth().getIPAddress(), port);
 
     return true;
@@ -35,7 +35,7 @@ bool CommandServer::init(int port)
 //------------------------------------------------------------------------------
 void CommandServer::run()
 //------------------------------------------------------------------------------
-{
+{    
     while(true)
     {
         TCPSocketConnection client;
@@ -45,6 +45,7 @@ void CommandServer::run()
         AppBoard::lcd().locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
         AppBoard::lcd().printf("\nConnected to %s\n", client.get_address());
 
+        AppBoard::setConsoleActive(true);
         while(true)
         {
             const unsigned int cmdBufferLen = 256;
@@ -85,6 +86,7 @@ void CommandServer::run()
 
         }
         client.close();
+        AppBoard::setConsoleActive(false);
     }
 }
 
@@ -213,7 +215,7 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
 
     // notify robot controller
     RemoteMessage::MessageID* id = new RemoteMessage::MessageID;
-    *id = (RemoteMessage::MessageID)pCmd[RemoteMessage::ID_INDEX];
+    *id = RemoteMessage::SET_MODE;
     if( osOK != AppBoard::pendingCommand().put(id,1000) )
     {
         AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
@@ -230,9 +232,9 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
         return IPC_ERROR;
     }
 
-    // check if reply is to the command we sent
+    // check if reply is for the command we sent
     RemoteMessage::MessageID* evId = (RemoteMessage::MessageID*)evt.value.p;
-    bool b = (*evId == (RemoteMessage::MessageID)pCmd[RemoteMessage::ID_INDEX]);
+    bool b = (*evId == RemoteMessage::SET_MODE);
     delete evId;
     if( !b )
     {
@@ -258,7 +260,7 @@ int CommandServer::processGetMode(unsigned char* pRespBuf, unsigned int respBufL
 //-----------------------------------------------------------------------------
 {
     ModeResponse resp;
-    resp.bytes()[RemoteMessage::ID_INDEX] = RemoteMessage::GET_MODE;
+
     unsigned int sz = resp.size();
 
     if( sz > respBufLen )
