@@ -19,33 +19,43 @@
 class AppBoard
 {
 public:
+
+    // the one and only me
     static inline AppBoard& singleton();
 
+    // robot serial port configuration
+    static const PinName ROBOT_SERIAL_TX = p9;
+    static const PinName ROBOT_SERIAL_RX = p10;
+    static const int ROBOT_SERIAL_BAUD = 9600;
+
+    // command server configuration
+    static const int SERVER_PORT = 1234;
+
+    // lcd configuration
     static const int DISP_INFO_LOC_X = 0;     //!< X location for info message on LCD
     static const int DISP_INFO_LOC_Y = 0;     //!< Y location for info message on LCD
     static const int DISP_ERR_LOC_X = 0;    //!< X location for error message on LCD
     static const int DISP_ERR_LOC_Y = 1;   //!< Y location for error message on LCD
 
+    // peripherals
     static C12832_LCD& lcd() { return singleton()._lcd; }
     static EthernetInterface& eth() { return singleton()._eth; }
+    static Serial& robotPort() { return singleton()._robotPort; }
 
-    static DesiredState& desiredState() { return singleton()._desiredState; }
-    static CurrentState& currentState() { return singleton()._currentState; }
-
+    // remote console connection state
     static bool isConsoleActive() { return singleton()._isConsoleActive; }
     static void setConsoleActive(bool option) { singleton()._isConsoleActive = option; }
 
-    /// queue of pending commands. Robot control thread does the following
-    /// - check the queue for pending command id
-    /// - read and destroy the pending command id (call delete on pointer returned by get)
-    /// - update currentState depending on command id
-    /// - Append the command id to pendingResponses queue to notify command server
-    /// Note: delete any items taken off the queue (call delete)
-    static rtos::Queue<RemoteMessage::MessageID, 1>& pendingCommand() { return singleton()._pendingCommand; }
+    // robot state
+    static DesiredState& desiredState() { return singleton()._desiredState; }
+    static CurrentState& currentState() { return singleton()._currentState; }
 
+    // queue for pending commands and replies
+    static rtos::Queue<RemoteMessage::MessageID, 1>& pendingCommand() { return singleton()._pendingCommand; }
     static rtos::Queue<RemoteMessage::MessageID, 1>& pendingReply() { return singleton()._pendingReply; }
 
     static bool initEthernet();
+    static bool initRobotPort();
 private:
     AppBoard();
     ~AppBoard();
@@ -53,6 +63,7 @@ private:
 public:
     bool                _isConsoleActive;
 
+    Serial              _robotPort;
     C12832_LCD          _lcd;
     EthernetInterface   _eth;
 

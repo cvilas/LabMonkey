@@ -9,7 +9,8 @@
 //==============================================================================
 AppBoard::AppBoard()
 //==============================================================================
-    : _isConsoleActive(false)
+    : _isConsoleActive(false),
+      _robotPort(ROBOT_SERIAL_TX, ROBOT_SERIAL_RX)
 {
 }
 
@@ -39,4 +40,14 @@ bool AppBoard::initEthernet()
         return false;
     }
     return true;
+}
+
+//------------------------------------------------------------------------------
+bool AppBoard::initRobotPort()
+//------------------------------------------------------------------------------
+{
+    AppBoard& bd = singleton();
+
+    bd._robotPort.baud(ROBOT_SERIAL_BAUD);
+    bd._robotPort.format(8, Serial::None, 1);
 }

@@ -263,9 +263,12 @@ CommandServer.h
 main.cpp
 AppBoard.h
 AppBoard.cpp
-config.h
 design_notes.txt
 DesiredState.h
 CurrentState.h
 RobotController.h
 RobotController.cpp
+LabMonkey.h
+LabMonkey.cpp
+Motor.h
+Motor.cpp

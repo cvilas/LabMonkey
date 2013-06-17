@@ -1,4 +1,3 @@
-#include "config.h"
 #include "AppBoard.h"
 #include "CommandServer.h"
 #include "RobotController.h"
@@ -10,7 +9,7 @@ void command_thread(void const* arg)
 //=============================================================================
 {
     CommandServer cs;
-    if( cs.init(SERVER_PORT) )
+    if( cs.init(AppBoard::SERVER_PORT) )
     {
         cs.run();
     }
