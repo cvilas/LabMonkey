@@ -10,7 +10,8 @@
 AppBoard::AppBoard()
 //==============================================================================
     : _isConsoleActive(false),
-      _robotPort(ROBOT_SERIAL_TX, ROBOT_SERIAL_RX)
+      _robotPort(ROBOT_SERIAL_TX, ROBOT_SERIAL_RX),
+      _debugPort(DEBUG_SERIAL_TX, DEBUG_SERIAL_RX)
 {
 }
 
@@ -20,34 +21,65 @@ AppBoard::~AppBoard()
 {}
 
 //------------------------------------------------------------------------------
-bool AppBoard::initEthernet()
+bool AppBoard::initComms()
 //------------------------------------------------------------------------------
 {
-    AppBoard& bd = singleton();
+    // serial ports
+    robotPort().baud(ROBOT_SERIAL_BAUD);
+    robotPort().format(8, Serial::None, 1);
+
+    debugPort().baud(DEBUG_SERIAL_BAUD);
+    debugPort().format(8, Serial::None, 1);
 
     // initialise ethernet. Do DHCP
-    if( 0 != bd._eth.init() )
+    if( 0 != eth().init() )
     {
-        bd._lcd.locate(DISP_ERR_LOC_X, DISP_ERR_LOC_Y);
-        bd._lcd.printf("\nEthernet init error");
+        lcd().locate(DISP_ERR_LOC_X, DISP_ERR_LOC_Y);
+        lcd().printf("\nEthernet init error");
         return false;
     }
 
-    if( 0 != bd._eth.connect() )
+    if( 0 != eth().connect() )
     {
-        bd._lcd.locate(DISP_ERR_LOC_X, DISP_ERR_LOC_Y);
-        bd._lcd.printf("\nEthernet connect error");
+        lcd().locate(DISP_ERR_LOC_X, DISP_ERR_LOC_Y);
+        lcd().printf("\nEthernet connect error");
         return false;
     }
+
     return true;
 }
 
 //------------------------------------------------------------------------------
-bool AppBoard::initRobotPort()
+void AppBoard::debugPrint(const std::string &msg)
 //------------------------------------------------------------------------------
 {
-    AppBoard& bd = singleton();
+    if( debugPort().writeable() )
+    {
+        debugPort().puts( msg.c_str() );
+    }
+}
 
-    bd._robotPort.baud(ROBOT_SERIAL_BAUD);
-    bd._robotPort.format(8, Serial::None, 1);
+//------------------------------------------------------------------------------
+std::string AppBoard::robotWrite(const std::string& msg)
+//------------------------------------------------------------------------------
+{
+    robotPort().puts( msg.c_str() );
+
+    int nTries = 10;
+    while( 0 == robotPort().readable() )
+    {
+        nTries--;
+        Thread::wait(10);
+        if( nTries < 1 )
+        {
+            debugPrint("[AppBoard::robotWrite] timed out waiting for response");
+            return std::string("");
+        }
+    }
+
+    const int len = 256;
+    char buff[len];
+    std::string reply( robotPort().gets(buff, len) );
+
+    return reply;
 }

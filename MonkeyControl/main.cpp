@@ -32,7 +32,7 @@ int main()
 {
     AppBoard::lcd().cls();
 
-    if( !AppBoard::initEthernet() )
+    if( !AppBoard::initComms() )
     {
         while(1){}
     }

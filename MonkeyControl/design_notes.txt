@@ -1,10 +1,6 @@
 Design notes:
 =============
 
-1. AppBoard class   : singleton class provides access to hardware IO on the mbed application board
-2. CommandServer    : serves remote console commands. interacts with shared memory area
-3.
-
 1. Command server thread (serial port)
 - block waits for remote commands
 - on GET_POSITION command,
@@ -45,13 +41,8 @@ Robot thread processes:
 
 Implementation steps
 1. Define comms messages
-2. Implement client-server code and test (Sunday June 9th)
-3. Prepare tablet and desktop for android qt development
 4. Implement command interface GUI (by Tue 11th)
-5. Implement mbed - shared memory, notification queue (Wed 12th)
-6. Implement mbed - robot controller emulator thread (Thu 13th)
 7. Implement GUI tasklist editor (Fri, Sat 15th)
-8. Integrate command thread and controller thread (Sun 16th)
 9. Implement rest of the essential elements in GUI
 10. Implement GUI 3D viewer for desktop guis (take coin and soqt from synaptic)
 11. Desktop GUI test

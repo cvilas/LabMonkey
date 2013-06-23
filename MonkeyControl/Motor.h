@@ -13,7 +13,15 @@
 class Motor
 {
 public:
-    Motor();
+    Motor(int node);
+
+
+    void setMaxVelocity(int v);
+    bool enable();
+
+private:
+    int _node;
+    int _maxVel;
 };
 
 #endif // MOTOR_H

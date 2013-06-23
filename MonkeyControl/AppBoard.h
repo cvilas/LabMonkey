@@ -14,6 +14,7 @@
 #include "DesiredState.h"
 #include "CurrentState.h"
 #include "Queue.h"
+#include <string>
 
 /// \brief singleton accessor for hardware io on the mbed application board
 class AppBoard
@@ -28,6 +29,11 @@ public:
     static const PinName ROBOT_SERIAL_RX = p10;
     static const int ROBOT_SERIAL_BAUD = 9600;
 
+    // debug serial port configuration
+    static const PinName DEBUG_SERIAL_TX = USBTX;
+    static const PinName DEBUG_SERIAL_RX = USBRX;
+    static const int DEBUG_SERIAL_BAUD = 9600;
+
     // command server configuration
     static const int SERVER_PORT = 1234;
 
@@ -41,6 +47,7 @@ public:
     static C12832_LCD& lcd() { return singleton()._lcd; }
     static EthernetInterface& eth() { return singleton()._eth; }
     static Serial& robotPort() { return singleton()._robotPort; }
+    static Serial& debugPort() { return singleton()._debugPort; }
 
     // remote console connection state
     static bool isConsoleActive() { return singleton()._isConsoleActive; }
@@ -54,8 +61,13 @@ public:
     static rtos::Queue<RemoteMessage::MessageID, 1>& pendingCommand() { return singleton()._pendingCommand; }
     static rtos::Queue<RemoteMessage::MessageID, 1>& pendingReply() { return singleton()._pendingReply; }
 
-    static bool initEthernet();
-    static bool initRobotPort();
+    // initialise all communication ports
+    static bool initComms();
+
+    // serial comms
+    static void debugPrint(const std::string& msg);
+    static std::string robotWrite(const std::string& msg);
+
 private:
     AppBoard();
     ~AppBoard();
@@ -64,6 +76,7 @@ public:
     bool                _isConsoleActive;
 
     Serial              _robotPort;
+    Serial              _debugPort;
     C12832_LCD          _lcd;
     EthernetInterface   _eth;
 
