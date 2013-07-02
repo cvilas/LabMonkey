@@ -3,7 +3,7 @@
 Motor::Motor(Transport& t, int node)
     : _transport(t),
       _node(node),
-      _okResp("OK"),
+      _okResp("OK\r\n"),
       lastPosition(0)
 {
     enable();
