@@ -31,27 +31,27 @@ void loop()
   // 4.  if OST reply with ??
   //      - else if POS reply with a number
   //      - else reply with OK\r\n
-  char buf[256];
-  char out[20];
-  int bytesAvailable = Serial.available();
+  char buf[100]; buf[0] = '\0';
+  static int n = 0;
+  int bytesAvailable = Serial.readBytes(buf, 100);
   if( bytesAvailable > 0 )
   {
-    Serial.readBytesUntil('\n', buf, bytesAvailable);
+    buf[5] = '\0';
     
-    if( buf[1] == 'O' && buf[1] == 'S')
+    if( buf[1] == 'O' && buf[2] == 'S')
     {
-      sprintf(out,"%d\r\n", 0x10000);
+      Serial.println(0x10000,DEC);
     }
     else if( buf[1] == 'P' && buf[2] == 'O')
     {
-      sprintf(out, "%d\r\n", 0);
+      n++;
+      Serial.println(n,DEC);
     }
     else
     {
-      sprintf(out, "%s\r\n","OK"); 
+      Serial.println("OK");
     }
-    
-    Serial.write(buf);
+    //Serial.write("OK\r\n");
   }
   
 }
