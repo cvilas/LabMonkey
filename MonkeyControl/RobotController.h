@@ -14,6 +14,7 @@
 /// \brief hmi interface for labmonkey
 /// \ingroup robot
 /// \todo
+/// - set CPR for all motors
 /// - get/set mode
 /// - record mode
 ///     - set home
