@@ -26,7 +26,7 @@
 /// - Waits for robot controller thread to respond
 /// - Replies to the remote console when a response becomes available
 class CommandServer
-{   
+{
 public:
     static const int COMM_ERROR = -1;   //!< console transport error
     static const int MSG_ERROR = -2;    //!< console message format error

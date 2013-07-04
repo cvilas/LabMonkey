@@ -14,20 +14,19 @@ bool CommandServer::init(int port)
 {
     if( 0 != _server.bind(port) )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("\nServer bind error");
+        AppBoard::logStream().printf("[CommandServer::init] Server bind error\n");
         return false;
     }
 
     if( 0 != _server.listen() )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("\nServer listen error");
+        AppBoard::logStream().printf("[CommandServer::init] Server listen error\n");
         return false;
     }
 
     AppBoard::lcd().locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
     AppBoard::lcd().printf("I am %s:%d", AppBoard::eth().getIPAddress(), port);
+    AppBoard::logStream().printf("[CommandServer::init] I am %s:%d\n", AppBoard::eth().getIPAddress(), port);
 
     return true;
 }
@@ -35,15 +34,14 @@ bool CommandServer::init(int port)
 //------------------------------------------------------------------------------
 void CommandServer::run()
 //------------------------------------------------------------------------------
-{    
+{
     while(true)
     {
         TCPSocketConnection client;
         _server.accept(client);
         client.set_blocking(true);
 
-        AppBoard::lcd().locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
-        AppBoard::lcd().printf("\nConnected to %s\n", client.get_address());
+        AppBoard::logStream().printf("Connected to %s\n", client.get_address());
 
         AppBoard::setConsoleActive(true);
         while(true)
@@ -86,6 +84,7 @@ void CommandServer::run()
 
         }
         client.close();
+        AppBoard::logStream().printf("Disconnected from console\n");
         AppBoard::setConsoleActive(false);
     }
 }
@@ -100,15 +99,13 @@ int CommandServer::receive(TCPSocketConnection& transport, unsigned char* buffer
     int bytesReceived = transport.receive(sockBuf, sizeof(sockBuf));
     if( bytesReceived < 0 )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("command receive error");
+        AppBoard::logStream().printf("[CommandServer::receive] command receive error\n");
         return COMM_ERROR;
     }
 
     if( !_framer.isFramed((const unsigned char*)sockBuf, bytesReceived) )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("command framing error");
+        AppBoard::logStream().printf("[CommandServer::receive] command framing error\n");
         return MSG_ERROR;
     }
 
@@ -116,8 +113,7 @@ int CommandServer::receive(TCPSocketConnection& transport, unsigned char* buffer
     unsigned int unframedSz = _framer.computeUnFramedSize((const unsigned char*)sockBuf, bytesReceived);
     if( bufferLen < unframedSz )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("command buffer short");
+        AppBoard::logStream().printf("[CommandServer::receive] command buffer short\n");
         return MSG_ERROR;
     }
 
@@ -126,8 +122,7 @@ int CommandServer::receive(TCPSocketConnection& transport, unsigned char* buffer
     //validate checksum
     if( buffer[unframedSz-1] != RemoteMessage::computeChecksum(buffer, unframedSz-1) )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("command checksum error");
+        AppBoard::logStream().printf("[CommandServer::receive] command checksum error\n");
         return MSG_ERROR;
     }
 
@@ -144,8 +139,7 @@ int CommandServer::respond(TCPSocketConnection& transport, unsigned char* buffer
     unsigned int szFramed = _framer.computeFramedSize(buffer, len);
     if( szFramed > sizeof(sockBuf) )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("framed response too long");
+        AppBoard::logStream().printf("[CommandServer::respond] framed response too long\n");
         return MSG_ERROR;
     }
 
@@ -154,8 +148,7 @@ int CommandServer::respond(TCPSocketConnection& transport, unsigned char* buffer
     // send
     if( szFramed != transport.send(sockBuf, szFramed) )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("response send error");
+        AppBoard::logStream().printf("[CommandServer::respond] response send error\n");
         return COMM_ERROR;
     }
 
@@ -202,8 +195,7 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
 
     if( sz > respBufLen )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("set mode: resp buff short");
+        AppBoard::logStream().printf("set mode: resp buff short\n");
         return MSG_ERROR;
     }
 
@@ -218,8 +210,7 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
     *id = RemoteMessage::SET_MODE;
     if( osOK != AppBoard::pendingCommand().put(id,1000) )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("set mode: ipc put error");
+        AppBoard::logStream().printf("set mode: ipc put error\n");
         return IPC_ERROR;
     }
 
@@ -227,8 +218,7 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
     osEvent evt = AppBoard::pendingReply().get(10000);
     if( evt.status != osEventMessage )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("set mode: ipc get error");
+        AppBoard::logStream().printf("set mode: ipc get error\n");
         return IPC_ERROR;
     }
 
@@ -238,8 +228,7 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
     delete evId;
     if( !b )
     {
-        AppBoard::lcd().locate(AppBoard::DISP_ERR_LOC_X, AppBoard::DISP_ERR_LOC_Y);
-        AppBoard::lcd().printf("set mode: ipc id error");
+        AppBoard::logStream().printf("set mode: ipc id error\n");
         return IPC_ERROR;
     }
 
@@ -277,6 +266,5 @@ int CommandServer::processGetMode(unsigned char* pRespBuf, unsigned int respBufL
 
     return sz;
 }
-
 
 
