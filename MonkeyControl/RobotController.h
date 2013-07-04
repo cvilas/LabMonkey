@@ -11,6 +11,18 @@
 #include "LabMonkey.h"
 #include <list>
 
+/// \brief hmi interface for labmonkey
+/// \ingroup robot
+/// \todo
+/// - get/set mode
+/// - record mode
+///     - set home
+///     - clear waypoints
+///     - record waypoint
+/// - play mode
+///     - speed+
+///     - speed-
+///     - play/stop
 class RobotController
 {   
 public:

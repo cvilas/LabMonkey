@@ -13,11 +13,6 @@
 
 /// \brief the robot
 /// \ingroup robot
-/// \todo
-/// - use waypoint time period in motion calculation
-/// - use speed scale factor for global speed
-/// - set cpr in motor config for all motor
-
 class LabMonkey
 {
 public:
