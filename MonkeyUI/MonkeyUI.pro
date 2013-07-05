@@ -45,7 +45,10 @@ HEADERS  += \
     ../MonkeyMessages/MessageFramer.h \
     ConsoleClient.h \
     IpPortDlg.h \
-    ModeSelectUi.h
+    ModeSelectUi.h \
+    ../MonkeyMessages/WaypointMessages.h \
+    ../MonkeyMessages/SpeedMessages.h \
+    ../MonkeyMessages/PositionMessages.h
 
 FORMS    += MainWindow.ui \
     IpPortDlg.ui \

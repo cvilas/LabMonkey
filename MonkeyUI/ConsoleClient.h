@@ -17,7 +17,7 @@
 class ConsoleClient
 {
 public:
-    const unsigned int TIMEOUT_MILLISECS = 10000;
+    static const unsigned int TIMEOUT_MILLISECS = 10000;
 
 public:
     ConsoleClient();
