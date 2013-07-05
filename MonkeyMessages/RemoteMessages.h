@@ -37,15 +37,26 @@ public:
     enum MessageID
     {
         ID_UNKNOWN = 0,
+
         SET_MODE,           //!< Set mode (See Mode)
         GET_MODE,           //!< Get currently active mode
+
         SET_SPEED,          //!< Set global speed
         GET_SPEED,          //!< Get currently active global speed
-        GOTO_POSITION,      //!< Go to a position specified by list of joint angles
+
+        SET_POSITION_HOME,  //!< Set current position as zero
+        SET_POSITION,       //!< Set encoder values at current position
         GET_POSITION,       //!< Get current position specified by list of joint angles
-        GET_NUM_WAYPOINTS,  //!< Get the number of active waypoints
-        SET_WAPOINT,        //!< Set a way point (list of joint angle lists)
-        GET_WAYPOINT,       //!< Get a way point
+
+        PLAY_WP,            //!< Play/Stop waypoints playback
+        RECORD_WP,          //!< record a waypoint
+
+        FREEZE_WP_LIST,     //!< Freeze waypoints list (don't allow modifications)
+        CLEAR_WP,           //!< Clear waypoints list
+        GET_NUM_WP,         //!< Get the number of waypoints
+        SET_WP,             //!< Set a way point (list of joint angle lists)
+        GET_WP,             //!< Get a way point
+
         ID_MAX
     };
 
@@ -96,11 +107,11 @@ protected:
 
     /// Create message given message code and payload
     /// \param id Command id (RemoteMessage::MessageID)
-    /// \param len Number of bytes in the above payload buffer(0-255).
-    ///             - If the len > size(), only size() elements are copied.
-    ///             - If len < size(), [len - size()-1] elements are set to 0.
     /// \param pPayloadData Pointer to buffer containing *payload* data.
-    void initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char* pPayloadData);
+    /// \param len Number of bytes in the above payload buffer(0-255).
+    ///             - If the len > payloadLength(), only payloadLength() elements are copied.
+    ///             - If len < payloadLength(), [len - payloadLength()-1] elements are set to 0.
+    void initialise(RemoteMessage::MessageID id, unsigned char* pPayloadData, unsigned int len);
 
     /// Derived classes must always call this method whenever it modifies the message buffer in any way.
     void setModified() { this->_bytes[this->size()-1] = this->computeChecksum(); }
@@ -162,7 +173,9 @@ unsigned char RemoteMessage::computeChecksum()
 
 //-----------------------------------------------------------------------------
 template<unsigned int np>
-void RemoteMessageT<np>::initialise(RemoteMessage::MessageID id, unsigned int len, unsigned char *pPayloadData)
+void RemoteMessageT<np>::initialise(RemoteMessage::MessageID id,
+                                    unsigned char *pPayloadData,
+                                    unsigned int len)
 //-----------------------------------------------------------------------------
 {
     this->_bytes[RemoteMessage::ID_INDEX] = id;

@@ -40,10 +40,10 @@ public:
     int getLastknownPosition() { return _lastKnownPosition; }
 
     /// power up motor
-    bool enable();
+    bool enablePower();
 
     /// power down motor
-    bool disable();
+    bool disablePower();
 
     /// get operating status
     int operationStatus();

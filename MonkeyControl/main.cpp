@@ -8,10 +8,10 @@
 void command_thread(void const* arg)
 //=============================================================================
 {
-    CommandServer cs;
-    if( cs.init(AppBoard::SERVER_PORT) )
+    CommandServer* cs = (CommandServer*)(arg);
+    if( cs->init(AppBoard::SERVER_PORT) )
     {
-        cs.run();
+        cs->run();
     }
 }
 
@@ -19,10 +19,10 @@ void command_thread(void const* arg)
 void robot_thread(void const* arg)
 //=============================================================================
 {
-    RobotController rc;
-    if( rc.init() )
+    RobotController* rc = (RobotController*)(arg);
+    if( rc->init() )
     {
-        rc.run();
+        rc->run();
     }
 }
 
@@ -31,17 +31,19 @@ int main()
 //=============================================================================
 {
     AppBoard::lcd().cls();
+    RobotController rc;
+    CommandServer cs(rc);
 
-    if( !AppBoard::initComms() )
+    if( !AppBoard::initPorts() )
     {
         while(1){}
     }
 
-    // command thread
-    Thread commandserver(command_thread);
-
     // Robot control thread
-    Thread robotcontroller(robot_thread);
+    Thread robotcontroller(robot_thread, &rc);
+
+    // command thread
+    Thread commandserver(command_thread, &cs);
 
     while(1)
     {

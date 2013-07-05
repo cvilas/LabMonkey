@@ -14,7 +14,7 @@ Motor::Motor(const MotorConfig& cfg)
       _okResp("OK\r\n"),
       _lastKnownPosition(0)
 {
-    enable();
+    enablePower();
     setAcceleration(cfg.acc_cpss);
 }
 
@@ -22,7 +22,7 @@ Motor::Motor(const MotorConfig& cfg)
 Motor::~Motor()
 //------------------------------------------------------------------------------
 {
-    disable();
+    disablePower();
 }
 
 //------------------------------------------------------------------------------
@@ -70,14 +70,14 @@ std::string Motor::command(const std::string& msg)
 }
 
 //------------------------------------------------------------------------------
-bool Motor::enable()
+bool Motor::enablePower()
 //------------------------------------------------------------------------------
 {
     return _okResp == command("EN");
 }
 
 //------------------------------------------------------------------------------
-bool Motor::disable()
+bool Motor::disablePower()
 //------------------------------------------------------------------------------
 {
     return _okResp == command("DI");

@@ -22,7 +22,7 @@ LabMonkey::LabMonkey()
 
     for(int i = 0; i < NUM_JOINTS; ++i)
     {
-        _pMotor[i]->disable();
+        _pMotor[i]->disablePower();
     }
 }
 
@@ -47,22 +47,32 @@ void LabMonkey::setHome()
 }
 
 //------------------------------------------------------------------------------
-void LabMonkey::enable()
+void LabMonkey::setPosition(int p[NUM_JOINTS])
 //------------------------------------------------------------------------------
 {
     for(int i = 0; i < NUM_JOINTS; ++i)
     {
-        _pMotor[i]->enable();
+        _pMotor[i]->home( p[i] );
     }
 }
 
 //------------------------------------------------------------------------------
-void LabMonkey::disable()
+void LabMonkey::enableMotorPower()
 //------------------------------------------------------------------------------
 {
     for(int i = 0; i < NUM_JOINTS; ++i)
     {
-        _pMotor[i]->disable();
+        _pMotor[i]->enablePower();
+    }
+}
+
+//------------------------------------------------------------------------------
+void LabMonkey::disableMotorPower()
+//------------------------------------------------------------------------------
+{
+    for(int i = 0; i < NUM_JOINTS; ++i)
+    {
+        _pMotor[i]->disablePower();
     }
 }
 

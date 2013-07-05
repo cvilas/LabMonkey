@@ -10,6 +10,7 @@
 
 #include "AppBoard.h"
 #include "MessageFramer.h"
+#include "RobotController.h"
 
 /// \brief mbed based server for the remote console
 /// \ingroup console
@@ -21,8 +22,7 @@
 /// - Creates a TCP server on specified port
 /// - Accepts commands from remote console
 /// - Deframes the TCP packets
-/// - Interprets the command and notifies the robot controller thread via
-///   the common message queue
+/// - Interprets the command and notifies the robot controller thread
 /// - Waits for robot controller thread to respond
 /// - Replies to the remote console when a response becomes available
 class CommandServer
@@ -33,7 +33,7 @@ public:
     static const int IPC_ERROR = -3;    //!< error in internal message passing between threads
 
 public:
-    CommandServer() {}
+    CommandServer(RobotController& rc) : _robot(rc) {}
     ~CommandServer() {}
 
     /// Initialise server and bind to specified port
@@ -67,10 +67,21 @@ public:
 private:
     int processSetMode(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
     int processGetMode(unsigned char* pRespBuf, unsigned int respBufLen);
+    int processSetSpeed(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+    int processGetSpeed(unsigned char* pRespBuf, unsigned int respBufLen);
+
+    int processSetHome(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+    int processSetPosition(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+    int processGetPosition(unsigned char* pRespBuf, unsigned int respBufLen);
+
+    int processPlayWp(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+    int processRecWp(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
+    int processGetNumWp(unsigned char* pRespBuf, unsigned int respBufLen);
 
 private:
     TCPSocketServer _server;
     MessageFramer   _framer;
+    RobotController& _robot;
 };
 
 

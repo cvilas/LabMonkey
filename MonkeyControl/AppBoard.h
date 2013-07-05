@@ -11,9 +11,6 @@
 #include "mbed.h"
 #include "C12832_lcd.h"
 #include "EthernetInterface.h"
-#include "DesiredState.h"
-#include "CurrentState.h"
-#include "Queue.h"
 #include <string>
 
 /// \brief singleton accessor for hardware io on the mbed application board
@@ -41,9 +38,12 @@ public:
 
     // control button mapping
     static const PinName BTN_MODE = p13; // mode
-    static const PinName BTN_B = p14; // rec/play/stop
-    static const PinName BTN_C = p15; // clr/v+
-    static const PinName BTN_D = p16; // home/v-
+    static const PinName BTN_REC = p14; // rec
+    static const PinName BTN_PLAY = p14; // play/stop
+    static const PinName BTN_SPEED_UP = p15;
+    static const PinName BTN_CLEAR = p15;
+    static const PinName BTN_SPEED_DN = p16;
+    static const PinName BTN_HOME = p16;
 
     // lcd configuration
     static const int DISP_INFO_LOC_X = 0;     //!< X location for info message on LCD
@@ -55,37 +55,18 @@ public:
     static EthernetInterface& eth() { return singleton()._eth; }
     static Serial& robotPort() { return singleton()._robotPort; }
 
-    // remote console connection state
-    static bool isConsoleActive() { return singleton()._isConsoleActive; }
-    static void setConsoleActive(bool option) { singleton()._isConsoleActive = option; }
-
-    // robot state
-    static DesiredState& desiredState() { return singleton()._desiredState; }
-    static CurrentState& currentState() { return singleton()._currentState; }
-
-    // queue for pending commands and replies
-    static rtos::Queue<RemoteMessage::MessageID, 1>& pendingCommand() { return singleton()._pendingCommand; }
-    static rtos::Queue<RemoteMessage::MessageID, 1>& pendingReply() { return singleton()._pendingReply; }
-
-    static bool initComms();
+    static bool initPorts();
 
 private:
     AppBoard();
     ~AppBoard();
 
 public:
-    bool                _isConsoleActive;
 
     Serial              _robotPort;
     Serial              _logStream;
     C12832_LCD          _lcd;
     EthernetInterface   _eth;
-
-    DesiredState _desiredState;
-    CurrentState _currentState;
-
-    rtos::Queue<RemoteMessage::MessageID, 1> _pendingCommand;
-    rtos::Queue<RemoteMessage::MessageID, 1> _pendingReply;
 };
 
 //------------------------------------------------------------------------------

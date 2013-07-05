@@ -35,13 +35,16 @@ public:
     ~LabMonkey();
 
     /// enable motor power
-    void enable();
+    void enableMotorPower();
 
     /// disable motor power
-    void disable();
+    void disableMotorPower();
 
     /// set current position as home (encoder zero)
     void setHome();
+
+    /// set encoders for current position
+    void setPosition(int p[NUM_JOINTS]);
 
     /// read current position
     void getPosition(int p[NUM_JOINTS]);

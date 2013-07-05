@@ -7,6 +7,9 @@
 #include "CommandServer.h"
 #include "../MonkeyMessages/RemoteMessages.h"
 #include "../MonkeyMessages/ModeMessages.h"
+#include "../MonkeyMessages/SpeedMessages.h"
+#include "../MonkeyMessages/PositionMessages.h"
+#include "../MonkeyMessages/WaypointMessages.h"
 
 //==============================================================================
 bool CommandServer::init(int port)
@@ -43,7 +46,8 @@ void CommandServer::run()
 
         AppBoard::logStream().printf("Connected to %s\n", client.get_address());
 
-        AppBoard::setConsoleActive(true);
+        _robot.setConsoleActive(true);
+
         while(true)
         {
             const unsigned int cmdBufferLen = 256;
@@ -84,8 +88,8 @@ void CommandServer::run()
 
         }
         client.close();
-        AppBoard::logStream().printf("Disconnected from console\n");
-        AppBoard::setConsoleActive(false);
+        _robot.setConsoleActive(false);
+        AppBoard::logStream().printf("Disconnected from console\n");        
     }
 }
 
@@ -160,14 +164,6 @@ int CommandServer::process(unsigned char* pCmd, unsigned int cmdLen,
                            unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
-    // - read command
-    // - set 'desired' section of shared memory
-    // - insert command in the 'pending command' queue
-
-    //wait for robot control to reply
-    // - if command was in pending queue, wait for reply
-    // - read 'actual' section of shared memory
-
     int respLen = 0;
 
     switch( pCmd[RemoteMessage::ID_INDEX] )
@@ -178,6 +174,29 @@ int CommandServer::process(unsigned char* pCmd, unsigned int cmdLen,
     case RemoteMessage::GET_MODE:
         respLen = processGetMode(pRespBuf, respBufLen);
         break;
+    case RemoteMessage::SET_SPEED:
+        respLen = processSetSpeed(pCmd, cmdLen, pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::GET_SPEED:
+        respLen = processGetSpeed(pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::SET_POSITION_HOME:
+        respLen = processSetHome(pCmd, cmdLen, pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::SET_POSITION:
+        respLen = processSetPosition(pCmd, cmdLen, pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::GET_POSITION:
+        respLen = processGetPosition(pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::PLAY_WP:
+        respLen = processPlayWp(pCmd, cmdLen, pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::RECORD_WP:
+        respLen = processRecWp(pCmd, cmdLen, pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::GET_NUM_WP:
+        respLen = processGetNumWp(pRespBuf, respBufLen);
     default:
         break;
     }
@@ -190,58 +209,8 @@ int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
                                   unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
-    ModeResponse resp;
-    unsigned int sz = resp.size();
-
-    if( sz > respBufLen )
-    {
-        AppBoard::logStream().printf("set mode: resp buff short\n");
-        return MSG_ERROR;
-    }
-
-    // set desired state
-    DesiredState& desiredState = AppBoard::desiredState();
-    desiredState.lock.lock();
-    desiredState.mode = (RemoteMessage::Mode)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]);
-    desiredState.lock.unlock();
-
-    // notify robot controller
-    RemoteMessage::MessageID* id = new RemoteMessage::MessageID;
-    *id = RemoteMessage::SET_MODE;
-    if( osOK != AppBoard::pendingCommand().put(id,1000) )
-    {
-        AppBoard::logStream().printf("set mode: ipc put error\n");
-        return IPC_ERROR;
-    }
-
-    // wait for robot controller to act on it
-    osEvent evt = AppBoard::pendingReply().get(10000);
-    if( evt.status != osEventMessage )
-    {
-        AppBoard::logStream().printf("set mode: ipc get error\n");
-        return IPC_ERROR;
-    }
-
-    // check if reply is for the command we sent
-    RemoteMessage::MessageID* evId = (RemoteMessage::MessageID*)evt.value.p;
-    bool b = (*evId == RemoteMessage::SET_MODE);
-    delete evId;
-    if( !b )
-    {
-        AppBoard::logStream().printf("set mode: ipc id error\n");
-        return IPC_ERROR;
-    }
-
-    // get updated state
-    CurrentState& state = AppBoard::currentState();
-    state.lock.lock();
-    resp.setMode(state.mode);
-    state.lock.unlock();
-
-    // copy state value and return
-    memcpy( pRespBuf, resp.bytes(), sz );
-
-    return sz;
+    _robot.setMode( (RemoteMessage::Mode)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]) );
+    return processGetMode(pRespBuf, respBufLen);
 }
 
 //-----------------------------------------------------------------------------
@@ -254,17 +223,134 @@ int CommandServer::processGetMode(unsigned char* pRespBuf, unsigned int respBufL
 
     if( sz > respBufLen )
     {
+        AppBoard::logStream().printf("get mode: resp buff short\n");
         return MSG_ERROR;
     }
 
-    CurrentState& state = AppBoard::currentState();
-    state.lock.lock();
-    resp.setMode(state.mode);
-    state.lock.unlock();
+    resp.setMode( _robot.getMode() );
 
     memcpy( pRespBuf, resp.bytes(), sz );
 
     return sz;
 }
+
+//-----------------------------------------------------------------------------
+int CommandServer::processSetSpeed(unsigned char* pCmd, unsigned int cmdLen,
+                                  unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    _robot.setSpeed( (int)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]) );
+    return processGetSpeed(pRespBuf, respBufLen);
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processGetSpeed(unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    SpeedResponse resp;
+
+    unsigned int sz = resp.size();
+
+    if( sz > respBufLen )
+    {
+        AppBoard::logStream().printf("get speed: resp buff short\n");
+        return MSG_ERROR;
+    }
+
+    resp.setSpeed( _robot.getSpeed() );
+
+    memcpy( pRespBuf, resp.bytes(), sz );
+
+    return sz;
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processSetHome(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    _robot.onHomeBtn();
+    return processGetPosition(pRespBuf, respBufLen);
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processSetPosition(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    int p[LabMonkey::NUM_JOINTS];
+    int32_t* pJoints = (int32_t*)pCmd;
+    for(int i = 0; i < 5; ++i)
+    {
+        p[i] = pJoints[i];
+    }
+    _robot.setPosition(p);
+    return processGetPosition(pRespBuf, respBufLen);
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processGetPosition(unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    PositionResponse resp;
+
+    unsigned int sz = resp.size();
+
+    if( sz > respBufLen )
+    {
+        AppBoard::logStream().printf("get position: resp buff short\n");
+        return MSG_ERROR;
+    }
+
+    int p[LabMonkey::NUM_JOINTS];
+    _robot.getMonkey().getPosition(p);
+
+    for(int i = 0; i < LabMonkey::NUM_JOINTS; ++i)
+    {
+        resp.setPosition(i, p[i]);
+    }
+
+    memcpy( pRespBuf, resp.bytes(), sz );
+
+    return sz;
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processPlayWp(unsigned char* pCmd, unsigned int cmdLen,
+                                 unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    _robot.play( (pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1] != 0) );
+    return processGetNumWp(pRespBuf, respBufLen);
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processRecWp(unsigned char* pCmd, unsigned int cmdLen,
+                                unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    _robot.onRecBtn();
+    return processGetNumWp(pRespBuf, respBufLen);
+}
+
+//-----------------------------------------------------------------------------
+int CommandServer::processGetNumWp(unsigned char* pRespBuf, unsigned int respBufLen)
+//-----------------------------------------------------------------------------
+{
+    NumWpResponse resp;
+
+    unsigned int sz = resp.size();
+
+    if( sz > respBufLen )
+    {
+        AppBoard::logStream().printf("get num waypoints: resp buff short\n");
+        return MSG_ERROR;
+    }
+
+    resp.setNumber( _robot.getNumWayPoints() );
+
+    memcpy( pRespBuf, resp.bytes(), sz );
+
+    return sz;
+}
+
 
 

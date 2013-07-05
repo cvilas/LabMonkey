@@ -9,8 +9,7 @@
 //==============================================================================
 AppBoard::AppBoard()
 //==============================================================================
-    : _isConsoleActive(false),
-      _robotPort(ROBOT_SERIAL_TX, ROBOT_SERIAL_RX),
+    : _robotPort(ROBOT_SERIAL_TX, ROBOT_SERIAL_RX),
       _logStream(LOG_SERIAL_TX, LOG_SERIAL_RX)
 {
 }
@@ -21,7 +20,7 @@ AppBoard::~AppBoard()
 {}
 
 //------------------------------------------------------------------------------
-bool AppBoard::initComms()
+bool AppBoard::initPorts()
 //------------------------------------------------------------------------------
 {
     AppBoard& bd = singleton();

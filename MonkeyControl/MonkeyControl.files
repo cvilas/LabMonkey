@@ -264,11 +264,12 @@ main.cpp
 AppBoard.h
 AppBoard.cpp
 design_notes.txt
-DesiredState.h
-CurrentState.h
 RobotController.h
 RobotController.cpp
 LabMonkey.h
 LabMonkey.cpp
 Motor.h
 Motor.cpp
+../MonkeyMessages/SpeedMessages.h
+../MonkeyMessages/PositionMessages.h
+../MonkeyMessages/WaypointMessages.h

@@ -9,21 +9,11 @@
 #define ROBOT_CONTROLLER_H
 
 #include "LabMonkey.h"
+#include "../MonkeyMessages/RemoteMessages.h"
 #include <list>
 
 /// \brief hmi interface for labmonkey
 /// \ingroup robot
-/// \todo
-/// - set CPR for all motors
-/// - get/set mode
-/// - record mode
-///     - set home
-///     - clear waypoints
-///     - record waypoint
-/// - play mode
-///     - speed+
-///     - speed-
-///     - play/stop
 class RobotController
 {   
 public:
@@ -37,13 +27,28 @@ public:
 
     // ------------------------ user interface -----------------------------
 
-    void onPlayBtn();
+    // remote console connection state
+    bool isConsoleActive() { return _isConsoleActive; }
+    void setConsoleActive(bool option);
+
+    void setMode(RemoteMessage::Mode mode);
+    RemoteMessage::Mode getMode() { return _mode; }
+    void onModeBtn();
+
+    void setSpeed(int speed);
+    int getSpeed() { _monkey.getSpeedScale(); }
     void onSpeedDnBtn();
     void onSpeedUpBtn();
+
+    void play(bool option);
+    bool isPlaying() { return _playWayPoints; }
+    void onPlayBtn();
+
     void onRecBtn();
     void onClearBtn();
+
+    void setPosition(int p[LabMonkey::NUM_JOINTS]);
     void onHomeBtn();
-    void onModeBtn();
 
     /// Add a waypoint at the end of the existing list of waypoints
     void appendWayPoint(const LabMonkey::WayPoint& wp) { _wayPoints.push_back(wp); }
@@ -64,11 +69,17 @@ public:
     int getNumWayPoints() const { return _wayPoints.size(); }
 
 private:
-    void processConsoleCommand();
-    void processConsoleCommandSetMode();
+    void runPlayMode();
+    void runTeachMode();
 
 private:
-    LabMonkey _monkey;
+    bool                _isConsoleActive;
+    rtos::Mutex         _monkeyLock;
+    LabMonkey           _monkey;
+    RemoteMessage::Mode _mode;
+    bool                _playWayPoints;
+    bool                _isProcessingModes;
+    InterruptIn*        _pBtnIntr[4];
     std::list<LabMonkey::WayPoint> _wayPoints;
 };
 

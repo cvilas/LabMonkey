@@ -23,7 +23,7 @@ public:
     SetModeCommand(RemoteMessage::Mode mode)
     {
         unsigned char d = mode;
-        initialise(RemoteMessage::SET_MODE, 1, &d);
+        initialise(RemoteMessage::SET_MODE, &d, 1);
     }
     virtual ~SetModeCommand() {}
 }; // SetModeCommand
@@ -39,7 +39,7 @@ public:
 class GetModeCommand : public RemoteCommandT<0>
 {
 public:
-    GetModeCommand() { initialise(RemoteMessage::GET_MODE, 0, NULL); }
+    GetModeCommand() { initialise(RemoteMessage::GET_MODE, NULL, 0); }
     virtual ~GetModeCommand() {}
 }; // GetModeCommand
 
@@ -58,7 +58,7 @@ public:
     ModeResponse()
     {
         unsigned char d = RemoteMessage::MODE_UNKNOWN;
-        initialise(RemoteMessage::GET_MODE, 1, &d);
+        initialise(RemoteMessage::GET_MODE, &d, 1);
     }
     virtual ~ModeResponse() {}
 
@@ -66,7 +66,7 @@ public:
     /// verifies message ID is correct.
     virtual bool validate()
     {
-        return RemoteResponseT<1>::validate() && (id() == RemoteMessage::GET_MODE);
+        return RemoteResponseT::validate() && (id() == RemoteMessage::GET_MODE);
     }
 
     RemoteMessage::Mode getMode() { return (RemoteMessage::Mode)_bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
