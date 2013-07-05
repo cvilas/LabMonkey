@@ -33,6 +33,18 @@ public:
     bool init();
     void run();
 
+    LabMonkey& getMonkey() { return _monkey; }
+
+    // ------------------------ user interface -----------------------------
+
+    void onPlayBtn();
+    void onSpeedDnBtn();
+    void onSpeedUpBtn();
+    void onRecBtn();
+    void onClearBtn();
+    void onHomeBtn();
+    void onModeBtn();
+
     /// Add a waypoint at the end of the existing list of waypoints
     void appendWayPoint(const LabMonkey::WayPoint& wp) { _wayPoints.push_back(wp); }
 
@@ -56,6 +68,7 @@ private:
     void processConsoleCommandSetMode();
 
 private:
+    LabMonkey _monkey;
     std::list<LabMonkey::WayPoint> _wayPoints;
 };
 

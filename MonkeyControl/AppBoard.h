@@ -24,18 +24,26 @@ public:
     // the one and only me
     static inline AppBoard& singleton();
 
+    // logging intensity
     static const int VERBOSITY = 0; // 0: critical info, 1: 0 + motor log
+
+    // log port configuration
+    static const PinName LOG_SERIAL_TX = USBTX;
+    static const PinName LOG_SERIAL_RX = USBRX;
 
     // robot serial port configuration
     static const PinName ROBOT_SERIAL_TX = p9;
     static const PinName ROBOT_SERIAL_RX = p10;
     static const int ROBOT_SERIAL_BAUD = 9600;
 
-    static const PinName LOG_SERIAL_TX = USBTX;
-    static const PinName LOG_SERIAL_RX = USBRX;
-
     // command server configuration
     static const int SERVER_PORT = 1234;
+
+    // control button mapping
+    static const PinName BTN_MODE = p13; // mode
+    static const PinName BTN_B = p14; // rec/play/stop
+    static const PinName BTN_C = p15; // clr/v+
+    static const PinName BTN_D = p16; // home/v-
 
     // lcd configuration
     static const int DISP_INFO_LOC_X = 0;     //!< X location for info message on LCD
