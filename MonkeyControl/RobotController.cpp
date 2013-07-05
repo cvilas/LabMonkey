@@ -176,7 +176,6 @@ void RobotController::setMode(RemoteMessage::Mode mode)
 
     // start mode processing
     _mode = mode;
-
 }
 
 //------------------------------------------------------------------------------
@@ -226,6 +225,8 @@ void RobotController::onSpeedUpBtn()
 void RobotController::runPlayMode()
 //------------------------------------------------------------------------------
 {
+    AppBoard::logStream().printf("[RobotController::runPlayMode] entered\n");
+
     // mode controls:
     // - play: implemented here
     // - stop: see onPlayBtn(false)
@@ -252,18 +253,24 @@ void RobotController::runPlayMode()
         _monkeyLock.unlock();
 
     } // while
+
+    AppBoard::logStream().printf("[RobotController::runPlayMode] exited\n");
 }
 
 //------------------------------------------------------------------------------
 void RobotController::runTeachMode()
 //------------------------------------------------------------------------------
 {
+    AppBoard::logStream().printf("[RobotController::runTeachMode] entered\n");
+
     _monkey.disableMotorPower();
 
     while( _mode == RemoteMessage::MODE_TEACH )
     {
         Thread::wait(100);
     }
+
+    AppBoard::logStream().printf("[RobotController::runTeachMode] exited\n");
 }
 
 //------------------------------------------------------------------------------

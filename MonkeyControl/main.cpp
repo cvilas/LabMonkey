@@ -38,11 +38,15 @@ int main()
     {
         while(1){}
     }
+    AppBoard::logStream().printf("Ports initialised\n");
 
     // Robot control thread
+    AppBoard::logStream().printf("Starting robot controller\n");
     Thread robotcontroller(robot_thread, &rc);
+    Thread::wait(1000);
 
     // command thread
+    AppBoard::logStream().printf("Starting command server\n");
     Thread commandserver(command_thread, &cs);
 
     while(1)
