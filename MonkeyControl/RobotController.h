@@ -106,7 +106,7 @@ void RobotController::lockRobot(bool opt)
 void RobotController::appendWayPoint(const LabMonkey::WayPoint& wp)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::appendWayPoint]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::appendWayPoint]\n");
 
     if( (_mode == RemoteMessage::MODE_TEACH) && (_numWayPoints < MAX_WAYPOINTS) )
     {
@@ -125,7 +125,7 @@ void RobotController::appendWayPoint(const LabMonkey::WayPoint& wp)
 bool RobotController::removeWayPoint(int index)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::removeWayPoint] at %d\n", index);
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::removeWayPoint] at %d\n", index);
 
     if( (index < _numWayPoints) && (_mode == RemoteMessage::MODE_TEACH) )
     {
@@ -147,7 +147,7 @@ bool RobotController::removeWayPoint(int index)
 LabMonkey::WayPoint* RobotController::getWayPoint(int index)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::getWayPoint] at %d\n", index);
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::getWayPoint] at %d\n", index);
 
     if( index < _numWayPoints )
     {
@@ -161,7 +161,7 @@ LabMonkey::WayPoint* RobotController::getWayPoint(int index)
 void RobotController::clearWayPoints()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::clearWayPoints]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::clearWayPoints]\n");
     _numWayPoints = 0;
 }
 

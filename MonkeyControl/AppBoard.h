@@ -21,7 +21,7 @@ public:
     static inline AppBoard& singleton();
 
     // logging intensity
-    static const int VERBOSITY = 0; // 0: critical info, 1: 0 + motor log
+    static const int VERBOSITY = 0; // 0: critical info, 1: 0 + motor log, 2: 1 + function calls
 
     // log port configuration
     static const PinName LOG_SERIAL_TX = USBTX;

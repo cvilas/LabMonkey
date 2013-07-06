@@ -76,7 +76,7 @@ void RobotController::RobotController::onHomeBtn()
 void RobotController::setConsoleActive(bool option)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::setConsoleActive] %d\n", option);
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::setConsoleActive] %d\n", option);
     _isConsoleActive = option;
 }
 
@@ -84,7 +84,7 @@ void RobotController::setConsoleActive(bool option)
 void RobotController::setHome()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::setHome]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::setHome]\n");
     if( _mode == RemoteMessage::MODE_TEACH )
     {
         clearWayPoints();
@@ -99,7 +99,7 @@ void RobotController::setHome()
 void RobotController::setPosition(int p[LabMonkey::NUM_JOINTS])
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::setPosition]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::setPosition]\n");
     if( _mode == RemoteMessage::MODE_TEACH )
     {
         clearWayPoints();
@@ -124,7 +124,7 @@ void RobotController::getPosition(LabMonkey::WayPoint& wp)
 void RobotController::changeMode()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::changeMode]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::changeMode]\n");
     if( _modeButtonPressed )
     {
         _modeButtonPressed = false;
@@ -147,7 +147,7 @@ void RobotController::changeMode()
 void RobotController::doFunctionButtons()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::doFunctionButtons]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::doFunctionButtons]\n");
 
     // mode function control (record, play, stop)
 
@@ -213,7 +213,7 @@ void RobotController::doFunctionButtons()
 void RobotController::setMode(RemoteMessage::Mode mode)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::setMode] %d -> %d\n", _mode, mode);
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::setMode] %d -> %d\n", _mode, mode);
 
     // stop mode processing, ignore button presses
     _mode = RemoteMessage::MODE_UNKNOWN;
@@ -235,7 +235,7 @@ void RobotController::setMode(RemoteMessage::Mode mode)
 void RobotController::play(bool option)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::play] %d\n", option);
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::play] %d\n", option);
     lockRobot(true);
     _monkey.stop();
     _playWayPoints = option && (_mode == RemoteMessage::MODE_REPLAY);
@@ -246,7 +246,7 @@ void RobotController::play(bool option)
 void RobotController::recordPosition()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::recordPosition]\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::recordPosition]\n");
     if( _mode == RemoteMessage::MODE_TEACH )
     {
         LabMonkey::WayPoint wp;
@@ -259,7 +259,7 @@ void RobotController::recordPosition()
 void RobotController::setSpeed(int speed)
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::setSpeed] %d\n", speed);
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::setSpeed] %d\n", speed);
     lockRobot(true);
     _monkey.setSpeedScale(speed);
     lockRobot(false);
@@ -269,7 +269,7 @@ void RobotController::setSpeed(int speed)
 void RobotController::runPlayMode()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::runPlayMode] entered\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runPlayMode] entered\n");
 
     AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, getNumWayPoints() );
     setSpeed(0);
@@ -284,7 +284,7 @@ void RobotController::runPlayMode()
 
     while( !_modeButtonPressed && (_mode == RemoteMessage::MODE_REPLAY) )
     {
-        AppBoard::logStream().printf("[RobotController::runPlayMode] loop\n");
+        //AppBoard::logStream().printf("[RobotController::runPlayMode] loop\n");
 
         doFunctionButtons();
 
@@ -304,14 +304,14 @@ void RobotController::runPlayMode()
 
     } // while
 
-    AppBoard::logStream().printf("[RobotController::runPlayMode] exited\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runPlayMode] exited\n");
 }
 
 //------------------------------------------------------------------------------
 void RobotController::runTeachMode()
 //------------------------------------------------------------------------------
 {
-    AppBoard::logStream().printf("[RobotController::runTeachMode] entered\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runTeachMode] entered\n");
 
     AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_TEACH, getNumWayPoints());
     setSpeed(0);
@@ -322,12 +322,12 @@ void RobotController::runTeachMode()
 
     while( !_modeButtonPressed && (_mode == RemoteMessage::MODE_TEACH) )
     {
-        AppBoard::logStream().printf("[RobotController::runTeachMode] loop\n");
+        //AppBoard::logStream().printf("[RobotController::runTeachMode] loop\n");
         doFunctionButtons();
         Thread::wait(100);
     }
 
-    AppBoard::logStream().printf("[RobotController::runTeachMode] exited\n");
+    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runTeachMode] exited\n");
 }
 
 //------------------------------------------------------------------------------

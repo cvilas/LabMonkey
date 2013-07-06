@@ -47,22 +47,21 @@ void loop()
   int bytesAvailable = mySerial.readBytes(buf, 100);
   if( bytesAvailable > 0 )
   {
-    buf[5] = '\0';
     
     Serial.println(buf);
     
-    if( buf[1] == 'O' && buf[2] == 'S')
+    if( (buf[1] == 'O') && (buf[2] == 'S'))
     {
       mySerial.println(0x10000,DEC);
     }
-    else if( buf[1] == 'P' && buf[2] == 'O')
+    else if( (buf[1] == 'P') && (buf[2] == 'O'))
     {
       n++;
       mySerial.println(n,DEC);
     }
     else
     {
-      mySerial.println("OK");
+      mySerial.print("OK\r\n");
     }
     //Serial.write("OK\r\n");
   }
