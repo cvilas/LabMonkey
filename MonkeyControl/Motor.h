@@ -9,6 +9,7 @@
 #define MOTOR_H
 
 #include "AppBoard.h"
+#include <string>
 
 /// \brief motor configuration constants
 /// \ingroup robot
@@ -28,6 +29,7 @@ public:
 class Motor
 {
     static const int POSITION_ATTAINED = 0x10000;
+    static const std::string OK_RESPONSE;
 
 public:
     Motor(const MotorConfig& cfg);
@@ -96,7 +98,6 @@ private:
 
 private:
     MotorConfig _config;
-    std::string _okResp;
     int         _lastKnownPosition;
 };
 

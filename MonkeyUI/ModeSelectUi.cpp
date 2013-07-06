@@ -39,7 +39,7 @@ void ModeSelectUi::on_teachModeBtn_clicked()
 void ModeSelectUi::on_replayModeBtn_clicked()
 //------------------------------------------------------------------------------
 {
-    RemoteMessage::Mode m = _messenger.setMode(RemoteMessage::MODE_TEACH);
+    RemoteMessage::Mode m = _messenger.setMode(RemoteMessage::MODE_REPLAY);
 
     /// \todo
     /// handle reply

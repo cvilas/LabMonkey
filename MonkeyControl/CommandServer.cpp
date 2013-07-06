@@ -27,8 +27,7 @@ bool CommandServer::init(int port)
         return false;
     }
 
-    AppBoard::lcd().locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
-    AppBoard::lcd().printf("I am %s:%d", AppBoard::eth().getIPAddress(), port);
+    AppBoard::lcd().updateTitle( AppBoard::eth().getIPAddress(), port );
     AppBoard::logStream().printf("[CommandServer::init] I am %s:%d\n", AppBoard::eth().getIPAddress(), port);
 
     return true;
@@ -40,11 +39,12 @@ void CommandServer::run()
 {
     while(true)
     {
-        TCPSocketConnection client;
+         TCPSocketConnection client;
         _server.accept(client);
         client.set_blocking(true);
 
         AppBoard::logStream().printf("Connected to %s\n", client.get_address());
+        AppBoard::lcd().updateConnectionStatus(true);
 
         _robot.setConsoleActive(true);
 
@@ -89,7 +89,8 @@ void CommandServer::run()
         }
         client.close();
         _robot.setConsoleActive(false);
-        AppBoard::logStream().printf("Disconnected from console\n");        
+        AppBoard::logStream().printf("Disconnected from console\n");
+        AppBoard::lcd().updateConnectionStatus(false);
     }
 }
 
@@ -268,7 +269,7 @@ int CommandServer::processGetSpeed(unsigned char* pRespBuf, unsigned int respBuf
 int CommandServer::processSetHome(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
-    _robot.onHomeBtn();
+    _robot.setHome();
     return processGetPosition(pRespBuf, respBufLen);
 }
 
@@ -300,12 +301,12 @@ int CommandServer::processGetPosition(unsigned char* pRespBuf, unsigned int resp
         return MSG_ERROR;
     }
 
-    int p[LabMonkey::NUM_JOINTS];
-    _robot.getMonkey().getPosition(p);
+    LabMonkey::WayPoint wp;
+    _robot.getPosition(wp);
 
     for(int i = 0; i < LabMonkey::NUM_JOINTS; ++i)
     {
-        resp.setPosition(i, p[i]);
+        resp.setPosition(i, wp.pos[i]);
     }
 
     memcpy( pRespBuf, resp.bytes(), sz );
@@ -327,7 +328,7 @@ int CommandServer::processRecWp(unsigned char* pCmd, unsigned int cmdLen,
                                 unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
-    _robot.onRecBtn();
+    _robot.recordPosition();
     return processGetNumWp(pRespBuf, respBufLen);
 }
 
@@ -351,6 +352,5 @@ int CommandServer::processGetNumWp(unsigned char* pRespBuf, unsigned int respBuf
 
     return sz;
 }
-
 
 

@@ -10,7 +10,6 @@
 
 #include "Motor.h"
 
-
 /// \brief the robot
 /// \ingroup robot
 class LabMonkey
@@ -25,7 +24,7 @@ public:
     class WayPoint
     {
     public:
-        WayPoint() : periodMs(60000) {}
+        WayPoint() : periodMs(1) {}
         int periodMs;           //!< time period allocated to reach position (motor acceleration and velocity settings permitting)
         int pos[NUM_JOINTS];    //!< waypoint position defined in encoder counts
     };

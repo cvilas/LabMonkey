@@ -9,9 +9,8 @@
 #define APPBOARD_H
 
 #include "mbed.h"
-#include "C12832_lcd.h"
+#include "Display.h"
 #include "EthernetInterface.h"
-#include <string>
 
 /// \brief singleton accessor for hardware io on the mbed application board
 class AppBoard
@@ -38,19 +37,12 @@ public:
 
     // control button mapping
     static const PinName BTN_MODE = p13; // mode
-    static const PinName BTN_REC = p14; // rec
-    static const PinName BTN_PLAY = p14; // play/stop
-    static const PinName BTN_SPEED_UP = p15;
-    static const PinName BTN_CLEAR = p15;
-    static const PinName BTN_SPEED_DN = p16;
-    static const PinName BTN_HOME = p16;
-
-    // lcd configuration
-    static const int DISP_INFO_LOC_X = 0;     //!< X location for info message on LCD
-    static const int DISP_INFO_LOC_Y = 0;     //!< Y location for info message on LCD
+    static const PinName BTN_FUNC = p14; // rec, play/stop
+    static const PinName BTN_CLEAR = p15; //clear waypoints, speed down
+    static const PinName BTN_HOME = p16; // home, speed up
 
     // peripherals
-    static C12832_LCD& lcd() { return singleton()._lcd; }
+    static Display& lcd() { return singleton()._lcd; }
     static Serial& logStream() { return singleton()._logStream; }
     static EthernetInterface& eth() { return singleton()._eth; }
     static Serial& robotPort() { return singleton()._robotPort; }
@@ -65,7 +57,7 @@ public:
 
     Serial              _robotPort;
     Serial              _logStream;
-    C12832_LCD          _lcd;
+    Display             _lcd;
     EthernetInterface   _eth;
 };
 

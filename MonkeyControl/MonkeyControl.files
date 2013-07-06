@@ -273,3 +273,5 @@ Motor.cpp
 ../MonkeyMessages/SpeedMessages.h
 ../MonkeyMessages/PositionMessages.h
 ../MonkeyMessages/WaypointMessages.h
+Display.h
+Display.cpp

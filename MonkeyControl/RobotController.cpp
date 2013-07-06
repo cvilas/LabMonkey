@@ -10,23 +10,30 @@
 //==============================================================================
 RobotController::RobotController()
 //==============================================================================
-    : _isConsoleActive(false), _mode(RemoteMessage::MODE_UNKNOWN),
-      _playWayPoints(false), _isProcessingModes(false)
+    : _numWayPoints(0),
+      _isConsoleActive(false),
+      _mode(RemoteMessage::MODE_UNKNOWN),
+      _playWayPoints(false),
+      _isProcessingModes(false),
+      _modeBtn(AppBoard::BTN_MODE),
+      _functionBtn(AppBoard::BTN_FUNC),
+      _clearBtn(AppBoard::BTN_CLEAR),
+      _homeBtn(AppBoard::BTN_HOME),
+      _modeButtonPressed(false),
+      _functionBtnPressed(false),
+      _clearBtnPressed(false),
+      _homeBtnPressed(false)
 {
-    for(int i = 0; i < 4; ++i)
-    {
-        _pBtnIntr[i] = NULL;
-    }
+    _modeBtn.rise(this, &RobotController::onModeBtn);
+    _functionBtn.rise(this, &RobotController::onFunctionBtn);
+    _clearBtn.rise(this, &RobotController::onClearBtn);
+    _homeBtn.rise(this, &RobotController::onHomeBtn);
 }
 
 //------------------------------------------------------------------------------
 RobotController::~RobotController()
 //------------------------------------------------------------------------------
 {
-    for(int i = 0; i < 4; ++i)
-    {
-        if( _pBtnIntr[i] ) { delete _pBtnIntr[i]; _pBtnIntr[i] = NULL; }
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -38,49 +45,53 @@ bool RobotController::init()
 }
 
 //------------------------------------------------------------------------------
+void RobotController::RobotController::onModeBtn()
+//------------------------------------------------------------------------------
+{
+    _modeButtonPressed = !_isConsoleActive;
+}
+
+//------------------------------------------------------------------------------
+void RobotController::RobotController::onFunctionBtn()
+//------------------------------------------------------------------------------
+{
+    _functionBtnPressed = !_isConsoleActive;
+}
+
+//------------------------------------------------------------------------------
+void RobotController::RobotController::onClearBtn()
+//------------------------------------------------------------------------------
+{
+    _clearBtnPressed = !_isConsoleActive;
+}
+
+//------------------------------------------------------------------------------
+void RobotController::RobotController::onHomeBtn()
+//------------------------------------------------------------------------------
+{
+    _homeBtnPressed = !_isConsoleActive;
+}
+
+//------------------------------------------------------------------------------
 void RobotController::setConsoleActive(bool option)
 //------------------------------------------------------------------------------
 {
+    AppBoard::logStream().printf("[RobotController::setConsoleActive] %d\n", option);
     _isConsoleActive = option;
-    setMode( getMode() );
 }
 
 //------------------------------------------------------------------------------
-void RobotController::onRecBtn()
+void RobotController::setHome()
 //------------------------------------------------------------------------------
 {
+    AppBoard::logStream().printf("[RobotController::setHome]\n");
     if( _mode == RemoteMessage::MODE_TEACH )
     {
-        _monkeyLock.lock();
-        LabMonkey::WayPoint wp;
-        _monkey.getPosition(wp.pos);
-        appendWayPoint(wp);
-        _monkeyLock.unlock();
-    }
-}
-
-//------------------------------------------------------------------------------
-void RobotController::onClearBtn()
-//------------------------------------------------------------------------------
-{
-    if( _mode == RemoteMessage::MODE_TEACH )
-    {
-        _monkeyLock.lock();
         clearWayPoints();
-        _monkeyLock.unlock();
-    }
-}
 
-//------------------------------------------------------------------------------
-void RobotController::onHomeBtn()
-//------------------------------------------------------------------------------
-{
-    if( _mode == RemoteMessage::MODE_TEACH )
-    {
-        _monkeyLock.lock();
-        clearWayPoints();
+        lockRobot(true);
         _monkey.setHome();
-        _monkeyLock.unlock();
+        lockRobot(false);
     }
 }
 
@@ -88,38 +99,121 @@ void RobotController::onHomeBtn()
 void RobotController::setPosition(int p[LabMonkey::NUM_JOINTS])
 //------------------------------------------------------------------------------
 {
+    AppBoard::logStream().printf("[RobotController::setPosition]\n");
     if( _mode == RemoteMessage::MODE_TEACH )
     {
-        _monkeyLock.lock();
         clearWayPoints();
+
+        lockRobot(true);
         _monkey.setPosition(p);
-        _monkeyLock.unlock();
+        lockRobot(false);
     }
 }
 
 //------------------------------------------------------------------------------
-void RobotController::onModeBtn()
+void RobotController::getPosition(LabMonkey::WayPoint& wp)
 //------------------------------------------------------------------------------
 {
-    switch( _mode )
+    AppBoard::logStream().printf("[RobotController::getPosition]\n");
+    lockRobot(true);
+    _monkey.getPosition(wp.pos);
+    lockRobot(false);
+}
+
+//------------------------------------------------------------------------------
+void RobotController::changeMode()
+//------------------------------------------------------------------------------
+{
+    AppBoard::logStream().printf("[RobotController::changeMode]\n");
+    if( _modeButtonPressed )
     {
-    case RemoteMessage::MODE_TEACH:
-        setMode( RemoteMessage::MODE_REPLAY );
-        break;
-    case RemoteMessage::MODE_REPLAY:
-        setMode( RemoteMessage::MODE_TEACH );
-        break;
-    default:
-        AppBoard::logStream().printf("[RobotController::onModeBtn] invalid current mode\n");
-        break;
-    };
+        _modeButtonPressed = false;
+        switch( _mode )
+        {
+        case RemoteMessage::MODE_TEACH:
+            setMode( RemoteMessage::MODE_REPLAY );
+            break;
+        case RemoteMessage::MODE_REPLAY:
+            setMode( RemoteMessage::MODE_TEACH );
+            break;
+        default:
+            AppBoard::logStream().printf("[RobotController::changeMode] invalid current mode\n");
+            break;
+        };
+    }
+}
+
+//------------------------------------------------------------------------------
+void RobotController::doFunctionButtons()
+//------------------------------------------------------------------------------
+{
+    AppBoard::logStream().printf("[RobotController::doFunctionButtons]\n");
+
+    // mode function control (record, play, stop)
+
+    if( _functionBtnPressed )
+    {
+        _functionBtnPressed = false;
+        switch (_mode)
+        {
+        case RemoteMessage::MODE_TEACH:
+            recordPosition();
+            break;
+        case RemoteMessage::MODE_REPLAY:
+            play(!_playWayPoints);
+            break;
+        default:
+            break;
+        }
+    }
+
+    // clear waypoints or speed down
+
+    if( _clearBtnPressed )
+    {
+        _clearBtnPressed = false;
+        switch (_mode)
+        {
+        case RemoteMessage::MODE_TEACH:
+            clearWayPoints();
+            break;
+        case RemoteMessage::MODE_REPLAY:
+            setSpeed( _monkey.getSpeedScale() - 5);
+            AppBoard::lcd().updateSpeed( _monkey.getSpeedScale() );
+            break;
+        default:
+            break;
+        }
+    }
+
+    // set home or speed up
+
+    if( _homeBtnPressed )
+    {
+        _homeBtnPressed = false;
+
+        switch (_mode)
+        {
+        case RemoteMessage::MODE_TEACH:
+            clearWayPoints();
+            setHome();
+            break;
+        case RemoteMessage::MODE_REPLAY:
+            setSpeed(_monkey.getSpeedScale() + 5);
+            AppBoard::lcd().updateSpeed( _monkey.getSpeedScale() );
+            break;
+        default:
+            break;
+        }
+    }
+
 }
 
 //------------------------------------------------------------------------------
 void RobotController::setMode(RemoteMessage::Mode mode)
 //------------------------------------------------------------------------------
 {
-    play(false);
+    AppBoard::logStream().printf("[RobotController::setMode] %d -> %d\n", _mode, mode);
 
     // stop mode processing, ignore button presses
     _mode = RemoteMessage::MODE_UNKNOWN;
@@ -130,95 +224,45 @@ void RobotController::setMode(RemoteMessage::Mode mode)
         Thread::wait(100);
     }
 
-    // initialise new mode
-    for(int i = 0; i < 4; ++i)
-    {
-        if( _pBtnIntr[i] ) { delete _pBtnIntr[i]; _pBtnIntr[i] = NULL; }
-    }
-
-    // map buttons only if remote console is not in control
-    if( !isConsoleActive() )
-    {
-        // map the mode button
-        _pBtnIntr[0] = new InterruptIn(AppBoard::BTN_MODE);
-        _pBtnIntr[0]->rise(this, &RobotController::onModeBtn );
-
-        // map all other buttons
-        switch( mode )
-        {
-        case RemoteMessage::MODE_REPLAY:
-            _pBtnIntr[1] = new InterruptIn(AppBoard::BTN_PLAY);
-            _pBtnIntr[1]->rise(this, &RobotController::onPlayBtn);
-
-            _pBtnIntr[2] = new InterruptIn(AppBoard::BTN_SPEED_UP);
-            _pBtnIntr[2]->rise(this, &RobotController::onSpeedUpBtn);
-
-            _pBtnIntr[3] = new InterruptIn(AppBoard::BTN_SPEED_DN);
-            _pBtnIntr[3]->rise(this, &RobotController::onSpeedDnBtn);
-
-            break;
-
-        case RemoteMessage::MODE_TEACH:
-            _pBtnIntr[1] = new InterruptIn(AppBoard::BTN_REC);
-            _pBtnIntr[1]->rise(this, &RobotController::onRecBtn);
-
-            _pBtnIntr[2] = new InterruptIn(AppBoard::BTN_CLEAR);
-            _pBtnIntr[2]->rise(this, &RobotController::onClearBtn);
-
-            _pBtnIntr[3] = new InterruptIn(AppBoard::BTN_HOME);
-            _pBtnIntr[3]->rise(this, &RobotController::onHomeBtn);
-
-            break;
-        default:
-            break;
-        };
-    }
+    // stop motion
+    play(false);
 
     // start mode processing
     _mode = mode;
 }
 
 //------------------------------------------------------------------------------
-void RobotController::onPlayBtn()
-//------------------------------------------------------------------------------
-{
-    play(!_playWayPoints);
-}
-
-//------------------------------------------------------------------------------
 void RobotController::play(bool option)
 //------------------------------------------------------------------------------
 {
-    _monkeyLock.lock();
+    AppBoard::logStream().printf("[RobotController::play] %d\n", option);
+    lockRobot(true);
     _monkey.stop();
     _playWayPoints = option && (_mode == RemoteMessage::MODE_REPLAY);
-    _monkeyLock.unlock();
+    lockRobot(false);
+}
+
+//------------------------------------------------------------------------------
+void RobotController::recordPosition()
+//------------------------------------------------------------------------------
+{
+    AppBoard::logStream().printf("[RobotController::recordPosition]\n");
+    if( _mode == RemoteMessage::MODE_TEACH )
+    {
+        LabMonkey::WayPoint wp;
+        getPosition(wp);
+        appendWayPoint(wp);
+    }
 }
 
 //------------------------------------------------------------------------------
 void RobotController::setSpeed(int speed)
 //------------------------------------------------------------------------------
 {
-    if( _mode == RemoteMessage::MODE_REPLAY )
-    {
-        _monkeyLock.lock();
-        _monkey.setSpeedScale(speed);
-        _monkeyLock.unlock();
-    }
-}
-
-//------------------------------------------------------------------------------
-void RobotController::onSpeedDnBtn()
-//------------------------------------------------------------------------------
-{
-    setSpeed(_monkey.getSpeedScale() - 5);
-}
-
-//------------------------------------------------------------------------------
-void RobotController::onSpeedUpBtn()
-//------------------------------------------------------------------------------
-{
-    setSpeed( _monkey.getSpeedScale() + 5);
+    AppBoard::logStream().printf("[RobotController::setSpeed] %d\n", speed);
+    lockRobot(true);
+    _monkey.setSpeedScale(speed);
+    lockRobot(false);
 }
 
 //------------------------------------------------------------------------------
@@ -227,30 +271,36 @@ void RobotController::runPlayMode()
 {
     AppBoard::logStream().printf("[RobotController::runPlayMode] entered\n");
 
-    // mode controls:
-    // - play: implemented here
-    // - stop: see onPlayBtn(false)
-    // - speed up: see onSpeedUpBtn()
-    // - speed down: onSpeedDnBtn()
+    AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, getNumWayPoints() );
+    setSpeed(0);
+
 
     int iCurrentWp = 0;
     int nWp = getNumWayPoints();
 
+    lockRobot(true);
     _monkey.enableMotorPower();
+    lockRobot(false);
 
-    while( _mode == RemoteMessage::MODE_REPLAY )
+    while( !_modeButtonPressed && (_mode == RemoteMessage::MODE_REPLAY) )
     {
+        AppBoard::logStream().printf("[RobotController::runPlayMode] loop\n");
+
+        doFunctionButtons();
+
         // cue next waypoint if we are playing
-        _monkeyLock.lock();
+        lockRobot(true);
         if( _playWayPoints && nWp)
         {
             if( _monkey.isMoveCompleted() )
             {
                 iCurrentWp = (iCurrentWp+1) % nWp;
+                AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, iCurrentWp);
                 _monkey.moveToWaypoint( *getWayPoint(iCurrentWp) );
             } // last waypoint completed
+
         } // is playing
-        _monkeyLock.unlock();
+        lockRobot(false);
 
     } // while
 
@@ -263,10 +313,17 @@ void RobotController::runTeachMode()
 {
     AppBoard::logStream().printf("[RobotController::runTeachMode] entered\n");
 
-    _monkey.disableMotorPower();
+    AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_TEACH, getNumWayPoints());
+    setSpeed(0);
 
-    while( _mode == RemoteMessage::MODE_TEACH )
+    lockRobot(true);
+    _monkey.disableMotorPower();
+    lockRobot(false);
+
+    while( !_modeButtonPressed && (_mode == RemoteMessage::MODE_TEACH) )
     {
+        AppBoard::logStream().printf("[RobotController::runTeachMode] loop\n");
+        doFunctionButtons();
         Thread::wait(100);
     }
 
@@ -279,6 +336,10 @@ void RobotController::run()
 {
     while(1)
     {
+        _isProcessingModes = false;
+
+        changeMode();
+
         switch( _mode )
         {
         case RemoteMessage::MODE_TEACH:
@@ -291,6 +352,7 @@ void RobotController::run()
             break;
         default:
             _isProcessingModes = false;
+            AppBoard::lcd().updateModeInfo(_mode);
             Thread::wait(100);
         };
     }

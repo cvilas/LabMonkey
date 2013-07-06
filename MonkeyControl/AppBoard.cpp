@@ -30,6 +30,7 @@ bool AppBoard::initPorts()
     bd._logStream.format(8, Serial::None, 1);
 
     // initialise ethernet. Do DHCP
+    bd._logStream.printf("[AppBoard::initComms] initialising Ethernet\n");
     if( 0 != bd._eth.init() )
     {
         bd._logStream.printf("[AppBoard::initComms] Ethernet init error\n");
@@ -46,9 +47,8 @@ bool AppBoard::initPorts()
     bd._robotPort.baud(ROBOT_SERIAL_BAUD);
     bd._robotPort.format(8, Serial::None, 1);
 
-    bd._lcd.locate(AppBoard::DISP_INFO_LOC_X, AppBoard::DISP_INFO_LOC_Y);
-    bd._lcd.printf("IP: %s", AppBoard::eth().getIPAddress());
-    bd._logStream.printf("[AppBoard::initComms] Robot IP: %s\n", AppBoard::eth().getIPAddress());
+    bd._lcd.updateTitle( bd._eth.getIPAddress(), 0 );
+    bd._logStream.printf("[AppBoard::initComms] Robot IP: %s\n", bd._eth.getIPAddress() );
 
     return true;
 }

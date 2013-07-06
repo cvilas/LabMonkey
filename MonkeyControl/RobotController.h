@@ -10,19 +10,21 @@
 
 #include "LabMonkey.h"
 #include "../MonkeyMessages/RemoteMessages.h"
-#include <list>
 
 /// \brief hmi interface for labmonkey
 /// \ingroup robot
 class RobotController
-{   
+{
 public:
+    static const int MAX_WAYPOINTS = 20;
+
     RobotController();
     ~RobotController();
 
     bool init();
     void run();
 
+    inline void lockRobot(bool opt);
     LabMonkey& getMonkey() { return _monkey; }
 
     // ------------------------ user interface -----------------------------
@@ -33,28 +35,20 @@ public:
 
     void setMode(RemoteMessage::Mode mode);
     RemoteMessage::Mode getMode() { return _mode; }
-    void onModeBtn();
 
     void setSpeed(int speed);
-    int getSpeed() { _monkey.getSpeedScale(); }
-    void onSpeedDnBtn();
-    void onSpeedUpBtn();
+    int getSpeed() { return _monkey.getSpeedScale(); }
 
     void play(bool option);
+    void recordPosition();
     bool isPlaying() { return _playWayPoints; }
-    void onPlayBtn();
 
-    void onRecBtn();
-    void onClearBtn();
-
+    void setHome();
     void setPosition(int p[LabMonkey::NUM_JOINTS]);
-    void onHomeBtn();
+    void getPosition(LabMonkey::WayPoint& wp);
 
     /// Add a waypoint at the end of the existing list of waypoints
-    void appendWayPoint(const LabMonkey::WayPoint& wp) { _wayPoints.push_back(wp); }
-
-    /// insert a waypoint into the list, before 'index' position
-    inline bool insertWayPoint(int index, const LabMonkey::WayPoint& wp);
+    inline void appendWayPoint(const LabMonkey::WayPoint& wp);
 
     /// get pointer to a waypoint in the list. NULL is returned for invalid index
     inline LabMonkey::WayPoint* getWayPoint(int index);
@@ -63,51 +57,89 @@ public:
     inline bool removeWayPoint(int index);
 
     /// remove all waypoints
-    void clearWayPoints() { _wayPoints.clear(); }
+    inline void clearWayPoints();
 
     /// get the number of waypoints
-    int getNumWayPoints() const { return _wayPoints.size(); }
+    int getNumWayPoints() const { return _numWayPoints; }
 
 private:
     void runPlayMode();
     void runTeachMode();
 
+    void onModeBtn();
+    void onFunctionBtn();
+    void onClearBtn();
+    void onHomeBtn();
+
+    void doFunctionButtons();
+    void changeMode();
+
 private:
+    int                 _numWayPoints;
     bool                _isConsoleActive;
     rtos::Mutex         _monkeyLock;
     LabMonkey           _monkey;
     RemoteMessage::Mode _mode;
     bool                _playWayPoints;
     bool                _isProcessingModes;
-    InterruptIn*        _pBtnIntr[4];
-    std::list<LabMonkey::WayPoint> _wayPoints;
+    LabMonkey::WayPoint _wayPoints[MAX_WAYPOINTS];
+
+    InterruptIn _modeBtn;
+    InterruptIn _functionBtn;
+    InterruptIn _clearBtn;
+    InterruptIn _homeBtn;
+
+    bool _modeButtonPressed;
+    bool _functionBtnPressed;
+    bool _clearBtnPressed;
+    bool _homeBtnPressed;
 };
 
 //------------------------------------------------------------------------------
-bool RobotController::insertWayPoint(int index, const LabMonkey::WayPoint& wp)
+void RobotController::lockRobot(bool opt)
 //------------------------------------------------------------------------------
 {
-    if( index < getNumWayPoints() )
+    opt ? _monkeyLock.lock() : _monkeyLock.unlock();
+}
+
+//------------------------------------------------------------------------------
+void RobotController::appendWayPoint(const LabMonkey::WayPoint& wp)
+//------------------------------------------------------------------------------
+{
+    AppBoard::logStream().printf("[RobotController::appendWayPoint]\n");
+
+    if( (_mode == RemoteMessage::MODE_TEACH) && (_numWayPoints < MAX_WAYPOINTS) )
     {
-        std::list<LabMonkey::WayPoint>::iterator it = _wayPoints.begin();
-        std::advance(it, index);
-        _wayPoints.insert(it, wp);
-        return true;
+        lockRobot(true);
+        _wayPoints[_numWayPoints] = wp;
+        _numWayPoints++;
+        AppBoard::lcd().updateModeInfo(_mode, getNumWayPoints());
+        lockRobot(false);
+
+        AppBoard::logStream().printf("[RobotController::appendWayPoint] %d %d %d %d %d [%d]\n",
+                                     wp.pos[0], wp.pos[1], wp.pos[2], wp.pos[3],wp.pos[4], wp.periodMs);
     }
-    return false;
 }
 
 //------------------------------------------------------------------------------
 bool RobotController::removeWayPoint(int index)
 //------------------------------------------------------------------------------
 {
-    if( index < getNumWayPoints() )
+    AppBoard::logStream().printf("[RobotController::removeWayPoint] at %d\n", index);
+
+    if( (index < _numWayPoints) && (_mode == RemoteMessage::MODE_TEACH) )
     {
-        std::list<LabMonkey::WayPoint>::iterator it = _wayPoints.begin();
-        std::advance(it, index);
-        _wayPoints.erase(it);
+        lockRobot(true);
+        for(int i = index; i < (_numWayPoints-1); ++i)
+        {
+            _wayPoints[i] = _wayPoints[i+1];
+        }
+        --_numWayPoints;
+        lockRobot(false);
+
         return true;
     }
+
     return false;
 }
 
@@ -115,12 +147,22 @@ bool RobotController::removeWayPoint(int index)
 LabMonkey::WayPoint* RobotController::getWayPoint(int index)
 //------------------------------------------------------------------------------
 {
-    if( index < getNumWayPoints() )
+    AppBoard::logStream().printf("[RobotController::getWayPoint] at %d\n", index);
+
+    if( index < _numWayPoints )
     {
-        std::list<LabMonkey::WayPoint>::iterator it = _wayPoints.begin();
-        std::advance(it, index);
-        return &(*it);
+        return &_wayPoints[index];
     }
+
     return NULL;
 }
+
+//------------------------------------------------------------------------------
+void RobotController::clearWayPoints()
+//------------------------------------------------------------------------------
+{
+    AppBoard::logStream().printf("[RobotController::clearWayPoints]\n");
+    _numWayPoints = 0;
+}
+
 #endif // ROBOT_CONTROLLER_H

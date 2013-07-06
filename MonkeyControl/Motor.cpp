@@ -7,11 +7,12 @@
 #include "Motor.h"
 #include <sstream>
 
+const std::string Motor::OK_RESPONSE("OK\r\n");
+
 //==============================================================================
 Motor::Motor(const MotorConfig& cfg)
 //==============================================================================
     : _config(cfg),
-      _okResp("OK\r\n"),
       _lastKnownPosition(0)
 {
     enablePower();
@@ -59,6 +60,7 @@ std::string Motor::command(const std::string& msg)
 
     // read reply
     char replyBuf[200];
+    replyBuf[0] = '\0';
     std::string reply( robot.gets(replyBuf,200) );
 
     if( AppBoard::VERBOSITY > 0 )
@@ -73,14 +75,14 @@ std::string Motor::command(const std::string& msg)
 bool Motor::enablePower()
 //------------------------------------------------------------------------------
 {
-    return _okResp == command("EN");
+    return OK_RESPONSE == command("EN");
 }
 
 //------------------------------------------------------------------------------
 bool Motor::disablePower()
 //------------------------------------------------------------------------------
 {
-    return _okResp == command("DI");
+    return OK_RESPONSE == command("DI");
 }
 
 //------------------------------------------------------------------------------
@@ -99,7 +101,7 @@ bool Motor::moveV(int rpm)
 {
     std::ostringstream str;
     str << "V" << rpm;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +117,7 @@ bool Motor::setTargetRpm(int rpm)
 {
     std::ostringstream str;
     str << "SP" << rpm;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -124,7 +126,7 @@ bool Motor::setMaxAcceleration(int acc)
 {
     std::ostringstream str;
     str << "AC" << acc;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -133,7 +135,7 @@ bool Motor::setMaxDeceleration(int dec)
 {
     std::ostringstream str;
     str << "DEC" << dec;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +151,7 @@ bool Motor::setAcceleration(int acc)
 bool Motor::moveP()
 //------------------------------------------------------------------------------
 {
-    return _okResp == command("M");
+    return OK_RESPONSE == command("M");
 }
 
 //------------------------------------------------------------------------------
@@ -158,7 +160,7 @@ bool Motor::loadRelative(int counts)
 {
     std::ostringstream str;
     str << "LR" << counts;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -182,7 +184,7 @@ bool Motor::home(int counts)
         str << counts;
     }
     _lastKnownPosition = counts; /*todo: check this is correct*/
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -191,7 +193,7 @@ bool Motor::loadAbsolute(int counts)
 {
     std::ostringstream str;
     str << "LA" << counts;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
@@ -236,14 +238,14 @@ bool Motor::isMoveCompleted()
 bool Motor::startProg()
 //------------------------------------------------------------------------------
 {
-    return _okResp == command("PROGSEQ");
+    return OK_RESPONSE == command("PROGSEQ");
 }
 
 //------------------------------------------------------------------------------
 bool Motor::endProg()
 //------------------------------------------------------------------------------
 {
-    return _okResp == command("END");
+    return OK_RESPONSE == command("END");
 }
 
 //------------------------------------------------------------------------------
@@ -252,12 +254,12 @@ bool Motor::delay(int seconds)
 {
     std::ostringstream str;
     str << "DELAY" << seconds*1000;
-    return _okResp == command(str.str());
+    return OK_RESPONSE == command(str.str());
 }
 
 //------------------------------------------------------------------------------
 bool Motor::runProg()
 //------------------------------------------------------------------------------
 {
-    return _okResp == command("ENPROG ");
+    return OK_RESPONSE == command("ENPROG ");
 }

@@ -30,10 +30,6 @@ void robot_thread(void const* arg)
 int main()
 //=============================================================================
 {
-    AppBoard::lcd().cls();
-    RobotController rc;
-    CommandServer cs(rc);
-
     if( !AppBoard::initPorts() )
     {
         while(1){}
@@ -42,11 +38,13 @@ int main()
 
     // Robot control thread
     AppBoard::logStream().printf("Starting robot controller\n");
+    RobotController rc;
     Thread robotcontroller(robot_thread, &rc);
     Thread::wait(1000);
 
     // command thread
     AppBoard::logStream().printf("Starting command server\n");
+    CommandServer cs(rc);
     Thread commandserver(command_thread, &cs);
 
     while(1)
