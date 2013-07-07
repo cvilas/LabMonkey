@@ -75,6 +75,7 @@ public:
 public:
     virtual unsigned char* bytes() = 0;
     virtual unsigned int size() const = 0;
+    virtual bool validate() = 0;
     static inline unsigned char computeChecksum(const unsigned char* pBuf, unsigned int len);
 
 protected:
@@ -100,6 +101,11 @@ public:
 
     MessageID id() const { return MessageID(_bytes[RemoteMessage::ID_INDEX]&0xFF); }
     unsigned char csum() const { return this->_bytes[this->size()-1]&0xFF; }
+
+    /// Verify that the message construction is correct. The method verifies
+    /// only checksum
+    /// \return true if the message format is correct
+    virtual bool validate();
 
 protected:
     RemoteMessageT() : RemoteMessage() {}
@@ -143,13 +149,6 @@ class RemoteResponseT : public RemoteMessageT<nPayloadBytes>
 public:
     RemoteResponseT() : RemoteMessageT<nPayloadBytes>() {}
     virtual ~RemoteResponseT() {}
-
-    /// Verify that the message construction is correct. The method verifies
-    /// message start, checksum and end bytes but not the payload.
-    /// Derived classes can override this method to provide additional checks.
-    /// \return true if the message format is correct
-    virtual bool validate();
-
 }; // RemoteResponse
 
 //-----------------------------------------------------------------------------
@@ -202,7 +201,7 @@ void RemoteMessageT<np>::initialise(RemoteMessage::MessageID id,
 
 //-----------------------------------------------------------------------------
 template<unsigned int np>
-bool RemoteResponseT<np>::validate()
+bool RemoteMessageT<np>::validate()
 //-----------------------------------------------------------------------------
 {
     return ( this->csum() == this->computeChecksum() );

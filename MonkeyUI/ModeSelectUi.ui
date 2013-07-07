@@ -25,6 +25,10 @@
      <property name="text">
       <string>Teach</string>
      </property>
+     <property name="icon">
+      <iconset resource="MonkyeUI.qrc">
+       <normaloff>:/images/DisabledLamp.png</normaloff>:/images/DisabledLamp.png</iconset>
+     </property>
      <property name="checkable">
       <bool>false</bool>
      </property>
@@ -44,6 +48,10 @@
      <property name="text">
       <string>Replay</string>
      </property>
+     <property name="icon">
+      <iconset resource="MonkyeUI.qrc">
+       <normaloff>:/images/DisabledLamp.png</normaloff>:/images/DisabledLamp.png</iconset>
+     </property>
      <property name="checkable">
       <bool>false</bool>
      </property>
@@ -54,6 +62,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="MonkyeUI.qrc"/>
+ </resources>
  <connections/>
 </ui>

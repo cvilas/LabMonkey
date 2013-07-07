@@ -39,7 +39,7 @@ public:
     void setSpeed(int speed);
     int getSpeed() { return _monkey.getSpeedScale(); }
 
-    void play(bool option);
+    bool play(bool option);
     void recordPosition();
     bool isPlaying() { return _playWayPoints; }
 

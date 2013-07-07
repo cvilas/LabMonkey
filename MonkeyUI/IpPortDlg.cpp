@@ -48,12 +48,14 @@ void IpPortDlg::on_connectBtn_clicked()
     if( success )
     {
         _pUi->statusLbl->setText("Connected");
+        _pUi->statusLbl->setPixmap(QPixmap(":images/LiveMonkey.png"));
     }
     else
     {
         delete _pSocket;
         _pSocket = NULL;
         _pUi->statusLbl->setText("Unable");
+        _pUi->statusLbl->setPixmap(QPixmap(":images/DeadMonkey.png"));
     }
 
 }

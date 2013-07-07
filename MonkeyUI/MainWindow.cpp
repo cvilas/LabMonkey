@@ -7,7 +7,10 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include <QMessageBox>
+#include <QFile>
 #include "IpPortDlg.h"
+#include "PlayModeUi.h"
+#include "TeachModeUi.h"
 
 //==============================================================================
 MainWindow::MainWindow(QWidget *parent)
@@ -16,14 +19,29 @@ MainWindow::MainWindow(QWidget *parent)
     _pUi(new Ui::MainWindow),
     _modeSelect(_messenger)
 {
+    // Set stylesheet
+    QFile styleFile(":/MonkeyUI.qss");
+    styleFile.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(styleFile.readAll());
+    styleFile.close();
+    setStyleSheet(styleSheet);
+
     _pUi->setupUi(this);
+    setWindowIcon(QIcon(QPixmap(":images/logo.png")));
 
     _pConnectionStatus = new QLabel;
     _pErrorInfo = new QLabel;
     _pUi->statusBar->addWidget(_pConnectionStatus);
     _pUi->statusBar->addWidget(_pErrorInfo);
 
-    this->setCentralWidget(&_modeSelect);
+    _controlsLayout.addWidget(&_modeSelect, 1);
+    _controlsLayout.addWidget(new QWidget);
+
+    QWidget* pWidget = new QWidget;
+    pWidget->setLayout(&_controlsLayout);
+    this->setCentralWidget(pWidget);
+
+    QObject::connect(&_modeSelect, SIGNAL(modeSelected(RemoteMessage::Mode)), this, SLOT(onModeSelected(RemoteMessage::Mode)));
 }
 
 //------------------------------------------------------------------------------
@@ -52,15 +70,50 @@ void MainWindow::on_actionTcpConnect_triggered()
     pDlg->exec();
 
     Grape::TcpSocket* pSocket = pDlg->getSocket();
+    _messenger.setTransport(pSocket);
     if( pSocket == NULL )
     {
         _pConnectionStatus->setText("Not Connected");
-        _messenger.setTransport(NULL);
+        _modeSelect.init();
     }
     else
     {
         _pConnectionStatus->setText(QString("connected to ") + QString(pSocket->getPeerName().c_str()) );
-        _messenger.setTransport(pSocket);
+        _modeSelect.init();
+    }
+
+}
+
+//------------------------------------------------------------------------------
+void MainWindow::onModeSelected(RemoteMessage::Mode m)
+//------------------------------------------------------------------------------
+{
+    QLayoutItem* pWidget = _controlsLayout.itemAt(1);
+    if( pWidget )
+    {
+        _controlsLayout.removeItem(pWidget);
+        delete pWidget->widget();
+    }
+
+    switch(m)
+    {
+    case RemoteMessage::MODE_TEACH:
+    {
+        TeachModeUi* pW = new TeachModeUi(_messenger);
+        pW->init();
+        _controlsLayout.addWidget(pW, 2);
+        break;
+    }
+    case RemoteMessage::MODE_REPLAY:
+    {
+        PlayModeUi* pW = new PlayModeUi(_messenger);
+        pW->init();
+        _controlsLayout.addWidget(pW, 2);
+        break;
+    }
+    default:
+        _controlsLayout.addWidget(new QWidget, 2);
+        break;
     }
 
 }

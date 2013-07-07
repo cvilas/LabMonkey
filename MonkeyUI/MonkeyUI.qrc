@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/">
+        <file>MonkeyUI.qss</file>
+        <file>images/DisabledLamp.png</file>
+        <file>images/EnabledLamp.png</file>
+        <file>images/StandbyLamp.png</file>
+        <file>images/logo.png</file>
+        <file>images/LiveMonkey.png</file>
+        <file>images/DeadMonkey.png</file>
+        <file>images/DisabledMonkey.png</file>
+    </qresource>
+</RCC>

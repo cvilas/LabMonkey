@@ -50,7 +50,7 @@ public:
 
     /// set global speed scale factor of 1 - 10 in increments of 0.1
     /// \param s set to (10 x scale factor) (e.g. s = 55 for speed scaling of 5.5)
-    void setSpeedScale(int s){ _speedScale = std::min(100, std::max(1, abs(s))); }
+    void setSpeedScale(int s);
 
     /// returns global speed scale factor x 10.
     int getSpeedScale() { return _speedScale; }

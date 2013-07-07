@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>265</width>
-    <height>142</height>
+    <height>204</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,6 +23,12 @@
    </item>
    <item row="0" column="1">
     <widget class="QLineEdit" name="addressSel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>10.42.0.51</string>
      </property>
@@ -37,6 +43,12 @@
    </item>
    <item row="1" column="1">
     <widget class="QLineEdit" name="portSel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>1234</string>
      </property>
@@ -44,33 +56,68 @@
    </item>
    <item row="2" column="0">
     <widget class="QPushButton" name="connectBtn">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>Connect</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="0">
+    <widget class="QPushButton" name="okBtn">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>OK</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" rowspan="2">
     <widget class="QLabel" name="statusLbl">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
+     </property>
      <property name="font">
       <font>
        <italic>true</italic>
       </font>
      </property>
      <property name="text">
-      <string>status</string>
+      <string/>
      </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QPushButton" name="okBtn">
-     <property name="text">
-      <string>OK</string>
+     <property name="pixmap">
+      <pixmap resource="MonkyeUI.qrc">:/images/DisabledMonkey.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="MonkyeUI.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>okBtn</sender>

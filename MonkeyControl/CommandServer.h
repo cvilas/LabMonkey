@@ -65,17 +65,13 @@ public:
     void run();
 
 private:
-    int processSetMode(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
     int processGetMode(unsigned char* pRespBuf, unsigned int respBufLen);
-    int processSetSpeed(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
     int processGetSpeed(unsigned char* pRespBuf, unsigned int respBufLen);
 
-    int processSetHome(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
     int processSetPosition(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
     int processGetPosition(unsigned char* pRespBuf, unsigned int respBufLen);
 
     int processPlayWp(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
-    int processRecWp(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen);
     int processGetNumWp(unsigned char* pRespBuf, unsigned int respBufLen);
 
 private:

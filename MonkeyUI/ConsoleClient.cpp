@@ -6,7 +6,9 @@
 
 #include "ConsoleClient.h"
 #include "MonkeyMessages/ModeMessages.h"
-#include <QDebug>
+#include "MonkeyMessages/WaypointMessages.h"
+#include "MonkeyMessages/SpeedMessages.h"
+#include "MonkeyMessages/PositionMessages.h"
 
 //==============================================================================
 ConsoleClient::ConsoleClient()
@@ -20,24 +22,14 @@ ConsoleClient::~ConsoleClient()
 {}
 
 //------------------------------------------------------------------------------
-RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
+bool ConsoleClient::command(RemoteMessage &cmd, RemoteMessage &resp)
 //------------------------------------------------------------------------------
 {
-    // create message
-    // frame message and send
-    // wait for reply, with timeout
-    // unframe
-    // validate
-    // return
-
     if( NULL == _pTransport )
     {
-        qDebug() << "[ConsoleClient::setMode] Invalid transport";
-        return RemoteMessage::MODE_UNKNOWN;
+        qDebug() << "[ConsoleClient::command] Invalid transport";
+        return false;
     }
-
-    // create command
-    SetModeCommand cmd(mode);
 
     // frame it
     std::vector<unsigned char> framedMsg;
@@ -47,16 +39,16 @@ RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
     unsigned int bytesWritten = _pTransport->write(framedMsg);
     if( bytesWritten < framedMsg.size() )
     {
-        qDebug() << "[ConsoleClient::setMode] transmit error";
-        return RemoteMessage::MODE_UNKNOWN;
+        qDebug() << "[ConsoleClient::command] transmit error";
+        return false;
     }
 
     // wait for response
     Grape::IDataPort::Status st = _pTransport->waitForRead(TIMEOUT_MILLISECS);
     if( st != Grape::IDataPort::PORT_OK )
     {
-        qDebug() << "[ConsoleClient::setMode] Error or timeout waiting for reply";
-        return RemoteMessage::MODE_UNKNOWN;
+        qDebug() << "[ConsoleClient::command] Error or timeout waiting for reply";
+        return false;
     }
 
     // read the reply
@@ -65,30 +57,151 @@ RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
     // check framing
     if( !_framer.isFramed(&framedMsg[0], bytesReceived) )
     {
-        qDebug() << "[ConsoleClient::setMode] Response frame error";
-        return RemoteMessage::MODE_UNKNOWN;
+        qDebug() << "[ConsoleClient::command] Response frame error";
+        return false;
     }
 
     // unframe it
-    ModeResponse expectedResponse;
-    unsigned int expSz = expectedResponse.size();
+    unsigned int expSz = resp.size();
     unsigned int unframedSz = _framer.computeUnFramedSize(&framedMsg[0], bytesReceived);
     if( unframedSz != expSz )
     {
-        qDebug() << "[ConsoleClient::setMode] Response size error. Expected " << expSz << " got " << unframedSz;
-        return RemoteMessage::MODE_UNKNOWN;
+        qDebug() << "[ConsoleClient::command] Response size error. Expected " << expSz << " got " << unframedSz;
+        return false;
     }
 
-    _framer.unframe(&framedMsg[0], bytesReceived, expectedResponse.bytes(), unframedSz);
+    _framer.unframe(&framedMsg[0], bytesReceived, resp.bytes(), unframedSz);
 
     // validate
-    if( !expectedResponse.validate())
+    if( !resp.validate())
     {
-        qDebug() << "[ConsoleClient::setMode] Response validation failed";
-        return RemoteMessage::MODE_UNKNOWN;
+        qDebug() << "[ConsoleClient::command] Response validation failed";
+        return false;
     }
 
-    return expectedResponse.getMode();
+    return true;
+}
+
+//------------------------------------------------------------------------------
+RemoteMessage::Mode ConsoleClient::setMode(RemoteMessage::Mode mode)
+//------------------------------------------------------------------------------
+{
+
+    SetModeCommand cmd(mode);
+    ModeResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return RemoteMessage::MODE_UNKNOWN;
+    }
+    return resp.getMode();
+}
+
+//------------------------------------------------------------------------------
+RemoteMessage::Mode ConsoleClient::getMode()
+//------------------------------------------------------------------------------
+{
+
+    GetModeCommand cmd;
+    ModeResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return RemoteMessage::MODE_UNKNOWN;
+    }
+    return resp.getMode();
+}
+
+//------------------------------------------------------------------------------
+bool ConsoleClient::play(bool option)
+//------------------------------------------------------------------------------
+{
+    PlayWpCommand cmd(option);
+    PlayWpResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return false;
+    }
+    return resp.isPlaying();
+}
+
+//------------------------------------------------------------------------------
+int ConsoleClient::setSpeed(int sp)
+//------------------------------------------------------------------------------
+{
+    SetSpeedCommand cmd(sp);
+    SpeedResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return false;
+    }
+    return resp.getSpeed();
+}
+
+//------------------------------------------------------------------------------
+int ConsoleClient::getSpeed()
+//------------------------------------------------------------------------------
+{
+    GetSpeedCommand cmd;
+    SpeedResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return 0;
+    }
+    return resp.getSpeed();
+}
+
+//------------------------------------------------------------------------------
+int ConsoleClient::getNumWayPoints()
+//------------------------------------------------------------------------------
+{
+    GetNumWpCommand cmd;
+    NumWpResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return 0;
+    }
+    return resp.getNumber();
+}
+
+//------------------------------------------------------------------------------
+int ConsoleClient::addWayPoint()
+//------------------------------------------------------------------------------
+{
+    RecordWpCommand cmd;
+    NumWpResponse resp;
+
+    if( !command(cmd, resp) )
+    {
+        return false;
+    }
+    return resp.getNumber();
+}
+
+//------------------------------------------------------------------------------
+bool ConsoleClient::setHome()
+//------------------------------------------------------------------------------
+{
+    SetHomeCommand cmd;
+    PositionResponse resp;
+    return command(cmd, resp);
+}
+
+//------------------------------------------------------------------------------
+int ConsoleClient::clearWayPoints()
+//------------------------------------------------------------------------------
+{
+    ClearAllWpCommand cmd;
+    NumWpResponse resp;
+    if( !command(cmd, resp) )
+    {
+        return false;
+    }
+    return resp.getNumber();
 }
 
 //------------------------------------------------------------------------------

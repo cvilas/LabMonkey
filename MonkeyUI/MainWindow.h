@@ -10,6 +10,7 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QVBoxLayout>
 #include "ConsoleClient.h"
 #include "ModeSelectUi.h"
 #include <io/TcpSocket.h>
@@ -29,6 +30,7 @@ public:
 private slots:
     void on_actionTcpConnect_triggered();
     void on_actionExit_triggered();
+    void onModeSelected(RemoteMessage::Mode m);
 
 private:
     Ui::MainWindow *_pUi;
@@ -36,6 +38,7 @@ private:
     QLabel* _pErrorInfo;
     ConsoleClient _messenger;
     ModeSelectUi _modeSelect;
+    QVBoxLayout _controlsLayout;
 }; // MainWindow
 
 #endif // MAINWINDOW_H

@@ -179,7 +179,6 @@ void RobotController::doFunctionButtons()
             break;
         case RemoteMessage::MODE_REPLAY:
             setSpeed( _monkey.getSpeedScale() - 5);
-            AppBoard::lcd().updateSpeed( _monkey.getSpeedScale() );
             break;
         default:
             break;
@@ -195,12 +194,10 @@ void RobotController::doFunctionButtons()
         switch (_mode)
         {
         case RemoteMessage::MODE_TEACH:
-            clearWayPoints();
             setHome();
             break;
         case RemoteMessage::MODE_REPLAY:
             setSpeed(_monkey.getSpeedScale() + 5);
-            AppBoard::lcd().updateSpeed( _monkey.getSpeedScale() );
             break;
         default:
             break;
@@ -232,14 +229,17 @@ void RobotController::setMode(RemoteMessage::Mode mode)
 }
 
 //------------------------------------------------------------------------------
-void RobotController::play(bool option)
+bool RobotController::play(bool option)
 //------------------------------------------------------------------------------
 {
     if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::play] %d\n", option);
+
     lockRobot(true);
     _monkey.stop();
     _playWayPoints = option && (_mode == RemoteMessage::MODE_REPLAY);
     lockRobot(false);
+
+    return _playWayPoints;
 }
 
 //------------------------------------------------------------------------------
@@ -262,6 +262,7 @@ void RobotController::setSpeed(int speed)
     if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::setSpeed] %d\n", speed);
     lockRobot(true);
     _monkey.setSpeedScale(speed);
+    AppBoard::lcd().updateSpeed( _monkey.getSpeedScale() );
     lockRobot(false);
 }
 
@@ -272,8 +273,6 @@ void RobotController::runPlayMode()
     if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runPlayMode] entered\n");
 
     AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, getNumWayPoints() );
-    setSpeed(0);
-
 
     int iCurrentWp = 0;
     int nWp = getNumWayPoints();
@@ -324,6 +323,7 @@ void RobotController::runTeachMode()
     {
         //AppBoard::logStream().printf("[RobotController::runTeachMode] loop\n");
         doFunctionButtons();
+
         Thread::wait(100);
     }
 

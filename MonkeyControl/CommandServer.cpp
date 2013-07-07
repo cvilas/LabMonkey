@@ -170,19 +170,22 @@ int CommandServer::process(unsigned char* pCmd, unsigned int cmdLen,
     switch( pCmd[RemoteMessage::ID_INDEX] )
     {
     case RemoteMessage::SET_MODE:
-        respLen = processSetMode(pCmd, cmdLen, pRespBuf, respBufLen);
+        _robot.setMode( (RemoteMessage::Mode)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]) );
+        respLen = processGetMode(pRespBuf, respBufLen);
         break;
     case RemoteMessage::GET_MODE:
         respLen = processGetMode(pRespBuf, respBufLen);
         break;
     case RemoteMessage::SET_SPEED:
-        respLen = processSetSpeed(pCmd, cmdLen, pRespBuf, respBufLen);
+        _robot.setSpeed( (int)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]) );
+        respLen = processGetSpeed(pRespBuf, respBufLen);
         break;
     case RemoteMessage::GET_SPEED:
         respLen = processGetSpeed(pRespBuf, respBufLen);
         break;
     case RemoteMessage::SET_POSITION_HOME:
-        respLen = processSetHome(pCmd, cmdLen, pRespBuf, respBufLen);
+        _robot.setHome();
+        respLen = processGetPosition(pRespBuf, respBufLen);
         break;
     case RemoteMessage::SET_POSITION:
         respLen = processSetPosition(pCmd, cmdLen, pRespBuf, respBufLen);
@@ -194,24 +197,21 @@ int CommandServer::process(unsigned char* pCmd, unsigned int cmdLen,
         respLen = processPlayWp(pCmd, cmdLen, pRespBuf, respBufLen);
         break;
     case RemoteMessage::RECORD_WP:
-        respLen = processRecWp(pCmd, cmdLen, pRespBuf, respBufLen);
+        _robot.recordPosition();
+        respLen = processGetNumWp(pRespBuf, respBufLen);
         break;
     case RemoteMessage::GET_NUM_WP:
         respLen = processGetNumWp(pRespBuf, respBufLen);
+        break;
+    case RemoteMessage::CLEAR_WP:
+        _robot.clearWayPoints();
+        respLen = processGetNumWp(pRespBuf, respBufLen);
+        break;
     default:
         break;
     }
 
     return respLen;
-}
-
-//-----------------------------------------------------------------------------
-int CommandServer::processSetMode(unsigned char* pCmd, unsigned int cmdLen,
-                                  unsigned char* pRespBuf, unsigned int respBufLen)
-//-----------------------------------------------------------------------------
-{
-    _robot.setMode( (RemoteMessage::Mode)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]) );
-    return processGetMode(pRespBuf, respBufLen);
 }
 
 //-----------------------------------------------------------------------------
@@ -236,15 +236,6 @@ int CommandServer::processGetMode(unsigned char* pRespBuf, unsigned int respBufL
 }
 
 //-----------------------------------------------------------------------------
-int CommandServer::processSetSpeed(unsigned char* pCmd, unsigned int cmdLen,
-                                  unsigned char* pRespBuf, unsigned int respBufLen)
-//-----------------------------------------------------------------------------
-{
-    _robot.setSpeed( (int)(pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]) );
-    return processGetSpeed(pRespBuf, respBufLen);
-}
-
-//-----------------------------------------------------------------------------
 int CommandServer::processGetSpeed(unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
@@ -263,14 +254,6 @@ int CommandServer::processGetSpeed(unsigned char* pRespBuf, unsigned int respBuf
     memcpy( pRespBuf, resp.bytes(), sz );
 
     return sz;
-}
-
-//-----------------------------------------------------------------------------
-int CommandServer::processSetHome(unsigned char* pCmd, unsigned int cmdLen, unsigned char* pRespBuf, unsigned int respBufLen)
-//-----------------------------------------------------------------------------
-{
-    _robot.setHome();
-    return processGetPosition(pRespBuf, respBufLen);
 }
 
 //-----------------------------------------------------------------------------
@@ -319,17 +302,23 @@ int CommandServer::processPlayWp(unsigned char* pCmd, unsigned int cmdLen,
                                  unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
-    _robot.play( (pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1] != 0) );
-    return processGetNumWp(pRespBuf, respBufLen);
-}
+    bool b = _robot.play( (pCmd[RemoteMessage::PAYLOAD_LENGTH_INDEX+1] != 0) );
 
-//-----------------------------------------------------------------------------
-int CommandServer::processRecWp(unsigned char* pCmd, unsigned int cmdLen,
-                                unsigned char* pRespBuf, unsigned int respBufLen)
-//-----------------------------------------------------------------------------
-{
-    _robot.recordPosition();
-    return processGetNumWp(pRespBuf, respBufLen);
+    PlayWpResponse resp;
+
+    unsigned int sz = resp.size();
+
+    if( sz > respBufLen )
+    {
+        AppBoard::logStream().printf("get num waypoints: resp buff short\n");
+        return MSG_ERROR;
+    }
+
+    resp.setPlaying(b);
+
+    memcpy( pRespBuf, resp.bytes(), sz );
+
+    return sz;
 }
 
 //-----------------------------------------------------------------------------

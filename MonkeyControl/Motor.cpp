@@ -59,9 +59,10 @@ std::string Motor::command(const std::string& msg)
     while( robot.readable() == 0 ) {}
 
     // read reply
-    char replyBuf[200];
+    const int replyBufLen = 40;
+    char replyBuf[replyBufLen];
     replyBuf[0] = '\0';
-    std::string reply( robot.gets(replyBuf,200) );
+    std::string reply( robot.gets(replyBuf,replyBufLen) );
 
     if( AppBoard::VERBOSITY > 0 )
     {
@@ -210,8 +211,10 @@ bool Motor::moveAbsolute(int counts)
 int Motor::getPosition()
 //------------------------------------------------------------------------------
 {
-    int t;
-    std::istringstream stream(command("POS"));
+    int t = 0;
+    std::string reply = command("POS");
+    //t = atoi(reply.c_str());
+    std::istringstream stream(reply);
     stream >> t;
     _lastKnownPosition = t;
     return t;
