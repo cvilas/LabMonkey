@@ -1,0 +1,8 @@
+- remove time parameter from waypoint
+- review speed scaling 
+	- scale down from fastest possible speed
+	- are the numbers correct (see debuglog)
+	- dynamic speed changes
+	- robot does not move after end of cycle if speed check introduced  in loop
+- implement OST like getpos (remove copy construction of istringstream
+- test everything on emulator
