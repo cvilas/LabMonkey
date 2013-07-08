@@ -9,7 +9,7 @@
 //==============================================================================
 LabMonkey::LabMonkey()
 //==============================================================================
-    : _speedScale(10)
+    : _speedScale(1)
 {
     // manually configure all motors (id, rpmLimit, acc, cpr)
     _pMotor[0] = new Motor( MotorConfig(1,  3000,   5000,   3000) );
