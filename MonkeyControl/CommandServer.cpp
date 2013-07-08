@@ -88,6 +88,7 @@ void CommandServer::run()
 
         }
         client.close();
+        _robot.play(false);
         _robot.setConsoleActive(false);
         AppBoard::logStream().printf("Disconnected from console\n");
         AppBoard::lcd().updateConnectionStatus(false);

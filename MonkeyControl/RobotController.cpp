@@ -271,52 +271,47 @@ void RobotController::runPlayMode()
 //------------------------------------------------------------------------------
 {
     if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runPlayMode] entered\n");
-
     AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, getNumWayPoints() );
 
-    int iCurrentWp = 0;
+    int iCurrentWp = -1;
     int nWp = getNumWayPoints();
+
+    bool moveComplete = true;
     int speed = 0;
-    bool skipWaitCompletion = true;
 
-    lockRobot(true);
-    _monkey.enableMotorPower();
-    lockRobot(false);
-
-    while( !_modeButtonPressed && (_mode == RemoteMessage::MODE_REPLAY) )
+    while(!_modeButtonPressed && (_mode == RemoteMessage::MODE_REPLAY))
     {
-        //AppBoard::logStream().printf("[RobotController::runPlayMode] loop\n");
-
         doFunctionButtons();
 
-        // cue next waypoint if we are playing
         lockRobot(true);
-        if( _playWayPoints && nWp)
-        {
-            int spNow = _monkey.getSpeedScale();
-            if( spNow != speed )
-            {
-                skipWaitCompletion = true;
-            }
-            speed = spNow;
 
-            if( _monkey.isMoveCompleted() || skipWaitCompletion )
-            {
-                skipWaitCompletion = false;
-                iCurrentWp = (iCurrentWp+1) % nWp;
-                AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, iCurrentWp);
-                AppBoard::logStream().printf("\n[wp %d]", iCurrentWp);
-                _monkey.moveToWaypoint( *getWayPoint(iCurrentWp) );
-            } // last waypoint completed
-
-        } // is playing
-        else
+        // completed move. line up next wp
+        moveComplete = moveComplete || _monkey.isMoveCompleted();
+        if( moveComplete && nWp )
         {
-            skipWaitCompletion = true;
+            iCurrentWp = (iCurrentWp+1) % nWp;
         }
-        lockRobot(false);
 
-    } // while
+        // speed changed. We want to recompute move to next waypoint
+        int nowSpeed = _monkey.getSpeedScale();
+        moveComplete = moveComplete || (nowSpeed != speed);
+        speed = nowSpeed;
+
+        // ensures transition from stop -> play works
+        moveComplete = moveComplete || (!_playWayPoints);
+
+        // cue next waypoint, if we are playing
+        if( _playWayPoints && nWp && moveComplete )
+        {
+            moveComplete = false;
+            AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, iCurrentWp);
+            AppBoard::logStream().printf("\n[wp %d]", iCurrentWp);
+            _monkey.moveToWaypoint( *getWayPoint(iCurrentWp) );
+
+        } // cue wp
+
+        lockRobot(false);
+    }
 
     if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::runPlayMode] exited\n");
 }

@@ -21,6 +21,8 @@
 
 #include <SoftwareSerial.h>
 
+char buf[10]; 
+
 byte rx = 2;
 byte tx = 3;
 
@@ -30,7 +32,8 @@ void setup()
   pinMode(rx, INPUT);
   pinMode(tx, OUTPUT);
   mySerial.begin(9600);
-  Serial.begin(9600);
+  mySerial.setTimeout(10);
+  //Serial.begin(9600);
 }
 
 void loop()
@@ -41,22 +44,27 @@ void loop()
   // 4.  if OST reply with ??
   //      - else if POS reply with a number
   //      - else reply with OK\r\n
-  char buf[10]; 
+
   for(int i = 0; i < 10; ++i ) buf[i] = '\0';
   static int n = 0;
-  int bytesAvailable = mySerial.readBytes(buf, 100);
+  static bool flip = false;
+  int bytesAvailable = mySerial.readBytes(buf, 10);
   if( bytesAvailable > 0 )
   {
+      n++;
     
-    Serial.println(buf);
+    //Serial.println(buf);
     
     if( (buf[1] == 'O') && (buf[2] == 'S'))
     {
-      mySerial.println(0x10000,DEC);
+      flip = !flip;
+      if( flip )
+        mySerial.println(0x10000,DEC);
+      else
+        mySerial.println(0,DEC);
     }
     else if( (buf[1] == 'P') && (buf[2] == 'O'))
     {
-      n++;
       mySerial.println(n,DEC);
     }
     else
