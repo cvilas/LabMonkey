@@ -239,7 +239,7 @@ int CommandServer::processGetMode(unsigned char* pRespBuf, unsigned int respBufL
 int CommandServer::processGetSpeed(unsigned char* pRespBuf, unsigned int respBufLen)
 //-----------------------------------------------------------------------------
 {
-    SpeedResponse resp;
+    SpeedScaleResponse resp;
 
     unsigned int sz = resp.size();
 
@@ -249,7 +249,7 @@ int CommandServer::processGetSpeed(unsigned char* pRespBuf, unsigned int respBuf
         return MSG_ERROR;
     }
 
-    resp.setSpeed( _robot.getSpeed() );
+    resp.setSpeedScale( _robot.getSpeed() );
 
     memcpy( pRespBuf, resp.bytes(), sz );
 

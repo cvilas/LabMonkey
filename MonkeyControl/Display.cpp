@@ -62,7 +62,7 @@ void Display::updateSpeed(int sp)
 //------------------------------------------------------------------------------
 {
     _lcd.locate(0,18);
-    _lcd.printf("%-11s %3d/100", "Speed", sp, 100);
+    _lcd.printf("%-11s %3d/10", "Speed", sp);
     _lcd.copy_to_lcd();
 }
 

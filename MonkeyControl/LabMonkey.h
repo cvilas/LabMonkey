@@ -24,7 +24,7 @@ public:
     class WayPoint
     {
     public:
-        WayPoint() : periodMs(1000) {}
+        WayPoint() : periodMs(0) {}
         int periodMs;           //!< time period allocated to reach position (motor acceleration and velocity settings permitting)
         int pos[NUM_JOINTS];    //!< waypoint position defined in encoder counts
     };
@@ -48,8 +48,8 @@ public:
     /// read current position
     void getPosition(int p[NUM_JOINTS]);
 
-    /// set global speed scale factor of 1 - 10 in increments of 0.1
-    /// \param s set to (10 x scale factor) (e.g. s = 55 for speed scaling of 5.5)
+    /// set global speed scale factor
+    /// \param s scale factor in range [1 - 10]
     void setSpeedScale(int s);
 
     /// returns global speed scale factor x 10.

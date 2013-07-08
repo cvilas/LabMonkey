@@ -9,7 +9,7 @@
 
 #include "RemoteMessages.h"
 
-/// \brief Set speed
+/// \brief Set speed scale factor
 /// \ingroup console
 ///
 /// Message format:
@@ -17,18 +17,18 @@
 /// [SET_SPEED][1][speed][CSUM]
 /// \endcode
 /// \see SpeedResponse
-class SetSpeedCommand : public RemoteCommandT<1>
+class SetSpeedScaleCommand : public RemoteCommandT<1>
 {
 public:
-    SetSpeedCommand(int speed)
+    SetSpeedScaleCommand(int speed)
     {
-        if( speed < 0 ) speed = 0;
-        if( speed > 100 ) speed = 100;
+        if( speed < 1 ) speed = 1;
+        if( speed > 10 ) speed = 10;
 
         unsigned char d = speed;
         initialise(RemoteMessage::SET_SPEED, &d, 1);
     }
-    virtual ~SetSpeedCommand() {}
+    virtual ~SetSpeedScaleCommand() {}
 }; // SetSpeedCommand
 
 /// \brief Get current global speed
@@ -39,11 +39,11 @@ public:
 /// [GET_SPEED][0][CSUM]
 /// \endcode
 /// \see SpeedResponse
-class GetSpeedCommand : public RemoteCommandT<0>
+class GetSpeedScaleCommand : public RemoteCommandT<0>
 {
 public:
-    GetSpeedCommand() { initialise(RemoteMessage::GET_SPEED, NULL, 0); }
-    virtual ~GetSpeedCommand() {}
+    GetSpeedScaleCommand() { initialise(RemoteMessage::GET_SPEED, NULL, 0); }
+    virtual ~GetSpeedScaleCommand() {}
 }; // GetSpeedCommand
 
 
@@ -55,15 +55,15 @@ public:
 /// [GET_SPEED][1][Mode][CSUM]
 /// \endcode
 /// \see SetSpeedCommand, GetSpeedCommand
-class SpeedResponse : public RemoteResponseT<1>
+class SpeedScaleResponse : public RemoteResponseT<1>
 {
 public:
-    SpeedResponse()
+    SpeedScaleResponse()
     {
         unsigned char d = 0xFF;
         initialise(RemoteMessage::GET_SPEED, &d, 1);
     }
-    virtual ~SpeedResponse() {}
+    virtual ~SpeedScaleResponse() {}
 
     /// Calls base class method of same name and additionally
     /// verifies message ID is correct.
@@ -72,8 +72,8 @@ public:
         return RemoteResponseT::validate() && (id() == RemoteMessage::GET_SPEED);
     }
 
-    int getSpeed() { return _bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
-    void setSpeed(int sp)
+    int getSpeedScale() { return _bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1]; }
+    void setSpeedScale(int sp)
     {
         _bytes[RemoteMessage::PAYLOAD_LENGTH_INDEX+1] = sp;
         setModified();

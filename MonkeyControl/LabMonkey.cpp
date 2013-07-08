@@ -115,7 +115,7 @@ void LabMonkey::setSpeedScale(int s)
 //------------------------------------------------------------------------------
 {
     if( s < 1 ) s = 1;
-    if( s > 100 ) s = 100;
+    if( s > 10 ) s = 10;
     _speedScale = s;
 }
 
@@ -133,71 +133,50 @@ void LabMonkey::stop()
 void LabMonkey::moveToWaypoint(const WayPoint& waypoint)
 //------------------------------------------------------------------------------
 {
+    /*
+     * Calculations:
+     *  For motors m
+     *  (1) counts to next target for a motor D[m] = position[m] - waypoint[m];
+     *  (2) fastest possible motor move time in ms, t[m] = {(60000 * D[m])/cpr[m]} * (1/rpm_limit[m]);
+     *  (3) fastest possible waypoint move time t_fast = max(t[m])
+     *  (4) move time after appling global speed scale (1-10), t_move = t_fast * (11 - scale);
+     *  (5) motor rpm, rpm[m] = {(60000 * D[m])/cpr[m]} * (1/t_move);
+     */
+
+    // where ae we now
     int position[NUM_JOINTS];
     getPosition(position);
 
-    // compute fastest time we can do
-    double movementTimeMins = 0;
-    long countsToTarget[NUM_JOINTS];
-    for(int i = 0; i < NUM_JOINTS; ++i)
-    {
-        float maxCountsPerMin = _pMotor[i]->getRpmLimit() * _pMotor[i]->getCountsPerRev();
-        countsToTarget[i] = labs( position[i] - waypoint.pos[i] );
-        movementTimeMins = std::max<double>( movementTimeMins, ((double)countsToTarget[i]/maxCountsPerMin) );
-    }
-
-    movementTimeMins = movementTimeMins * (11 - getSpeedScale()/10);
-    AppBoard::logStream().printf(" [T: %f]", movementTimeMins);
-
-    // set rpm
-    AppBoard::logStream().printf(" [V ");
-    for(int i = 0; i < NUM_JOINTS; ++i)
-    {
-        int rpm = (int)(countsToTarget[i]/(_pMotor[i]->getCountsPerRev() * movementTimeMins));
-        _pMotor[i]->setTargetRpm(rpm);
-        AppBoard::logStream().printf("%d ", rpm);
-    }
-    AppBoard::logStream().printf("]");
-
-    // move
-    for(int i = 0; i < NUM_JOINTS; ++i)
-    {
-        _pMotor[i]->moveAbsolute( waypoint.pos[i] );
-    }
-
-    /*
-    // compute time allowed for move
-    int movementTimeMs = (waypoint.periodMs * 10)/getSpeedScale();
-    long scaledRevsToTarget[NUM_JOINTS]; // scaled so that dividing by rpm gives time in ms
+    // where do we want to go and how fast can we get there
+    double movementTime = 0; // units: (1/10X) ms chunks for timing scale of (10X) * 60,000
+    double scaledRevsToTarget[NUM_JOINTS];
     for( int i = 0; i < NUM_JOINTS; ++i )
     {
-        scaledRevsToTarget[i] = labs(position[i] - waypoint.pos[i]) * (60000L/(long)_pMotor[i]->getCountsPerRev());
-        int minMs = scaledRevsToTarget[i]/_pMotor[i]->getRpmLimit();
-        movementTimeMs = std::max( movementTimeMs, minMs);
+        scaledRevsToTarget[i] = (llabs(1 + position[i] - waypoint.pos[i]) * 60000.0)/_pMotor[i]->getCountsPerRev();
+        movementTime = std::max<double>(movementTime, scaledRevsToTarget[i]/_pMotor[i]->getRpmLimit());
     }
 
-    AppBoard::logStream().printf(" [T: %d]", movementTimeMs);
+    // apply speed scale factor (scale down from fastest possible waypoint move)
+    int sp = getSpeedScale();
+    if( sp > 10 ) sp = 10;
+    if( sp < 1 ) sp = 1;
+    movementTime = movementTime * (11 - sp);
+    AppBoard::logStream().printf(" [T: %lf]", movementTime);
 
-    AppBoard::logStream().printf(" [SD %d %d %d %d %d]",
-                                 scaledRevsToTarget[0],scaledRevsToTarget[1],
-            scaledRevsToTarget[2],scaledRevsToTarget[3],scaledRevsToTarget[4]);
-
-    // set move speed
-    AppBoard::logStream().printf(" [V ");
-    for(int i = 0; i < NUM_JOINTS; ++i)
+    // set rpm
+    AppBoard::logStream().printf(" [V:");
+    for( int i = 0; i < NUM_JOINTS; ++i )
     {
-        int rpm = std::max<int>(10,scaledRevsToTarget[i]/movementTimeMs);
+        int rpm = 1 + scaledRevsToTarget[i]/movementTime;
         _pMotor[i]->setTargetRpm(rpm);
-        AppBoard::logStream().printf("%d ", rpm);
+        AppBoard::logStream().printf(" %d", rpm);
     }
     AppBoard::logStream().printf("]");
 
     // move
-    for(int i = 0; i < NUM_JOINTS; ++i)
+    for( int i = 0; i < NUM_JOINTS; ++i )
     {
         _pMotor[i]->moveAbsolute( waypoint.pos[i] );
     }
-    */
-
 }
 

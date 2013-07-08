@@ -6,3 +6,7 @@
 	- robot does not move after end of cycle if speed check introduced  in loop
 - implement OST like getpos (remove copy construction of istringstream
 - test everything on emulator
+- logging
+	- build time
+	- function activation
+	- waypoint cued - deltaT, deltaD, rpm 

@@ -130,28 +130,28 @@ bool ConsoleClient::play(bool option)
 int ConsoleClient::setSpeed(int sp)
 //------------------------------------------------------------------------------
 {
-    SetSpeedCommand cmd(sp);
-    SpeedResponse resp;
+    SetSpeedScaleCommand cmd(sp);
+    SpeedScaleResponse resp;
 
     if( !command(cmd, resp) )
     {
         return false;
     }
-    return resp.getSpeed();
+    return resp.getSpeedScale();
 }
 
 //------------------------------------------------------------------------------
 int ConsoleClient::getSpeed()
 //------------------------------------------------------------------------------
 {
-    GetSpeedCommand cmd;
-    SpeedResponse resp;
+    GetSpeedScaleCommand cmd;
+    SpeedScaleResponse resp;
 
     if( !command(cmd, resp) )
     {
         return 0;
     }
-    return resp.getSpeed();
+    return resp.getSpeedScale();
 }
 
 //------------------------------------------------------------------------------

@@ -29,8 +29,9 @@ bool AppBoard::initPorts()
     bd._logStream.baud(ROBOT_SERIAL_BAUD);
     bd._logStream.format(8, Serial::None, 1);
 
+    bd._logStream.printf("LabMonkey Build %s %s\n", __DATE__, __TIME__);
+
     // initialise ethernet. Do DHCP
-    bd._logStream.printf("[AppBoard::initComms] initialising Ethernet\n");
     if( 0 != bd._eth.init() )
     {
         bd._logStream.printf("[AppBoard::initComms] Ethernet init error\n");
