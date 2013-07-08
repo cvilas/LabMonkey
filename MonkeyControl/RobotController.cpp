@@ -178,7 +178,7 @@ void RobotController::doFunctionButtons()
             clearWayPoints();
             break;
         case RemoteMessage::MODE_REPLAY:
-            setSpeed( _monkey.getSpeedScale() - 5);
+            setSpeed( _monkey.getSpeedScale() - 1);
             break;
         default:
             break;
@@ -197,7 +197,7 @@ void RobotController::doFunctionButtons()
             setHome();
             break;
         case RemoteMessage::MODE_REPLAY:
-            setSpeed(_monkey.getSpeedScale() + 5);
+            setSpeed(_monkey.getSpeedScale() + 1);
             break;
         default:
             break;
