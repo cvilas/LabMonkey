@@ -24,7 +24,7 @@ public:
     class WayPoint
     {
     public:
-        WayPoint() : periodMs(1) {}
+        WayPoint() : periodMs(1000) {}
         int periodMs;           //!< time period allocated to reach position (motor acceleration and velocity settings permitting)
         int pos[NUM_JOINTS];    //!< waypoint position defined in encoder counts
     };

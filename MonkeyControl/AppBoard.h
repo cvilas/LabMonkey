@@ -36,10 +36,10 @@ public:
     static const int SERVER_PORT = 1234;
 
     // control button mapping
-    static const PinName BTN_MODE = p13; // mode
-    static const PinName BTN_FUNC = p14; // rec, play/stop
-    static const PinName BTN_CLEAR = p15; //clear waypoints, speed down
-    static const PinName BTN_HOME = p16; // home, speed up
+    static const PinName BTN_MODE = p14; // mode
+    static const PinName BTN_FUNC = p13; // rec, play/stop
+    static const PinName BTN_CLEAR = p16; //clear waypoints, speed down
+    static const PinName BTN_HOME = p17; // home, speed up
 
     // peripherals
     static Display& lcd() { return singleton()._lcd; }

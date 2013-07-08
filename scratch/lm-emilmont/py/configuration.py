@@ -1,5 +1,5 @@
 LABMONKEY = {
-    'com': 'COM4',
+    'com': '/dev/ttyUSB0',
     
     'motors': [
         {'id': 1, 'max_vel': 3000, 'acc':5000},
@@ -9,5 +9,5 @@ LABMONKEY = {
         {'id': 5, 'max_vel': 2000, 'acc':5000},
     ],
     
-    'debug': False
+    'debug': True
 }

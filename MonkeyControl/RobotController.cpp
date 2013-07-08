@@ -147,7 +147,7 @@ void RobotController::changeMode()
 void RobotController::doFunctionButtons()
 //------------------------------------------------------------------------------
 {
-    if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::doFunctionButtons]\n");
+    //if( AppBoard::VERBOSITY > 1 ) AppBoard::logStream().printf("[RobotController::doFunctionButtons]\n");
 
     // mode function control (record, play, stop)
 
@@ -276,6 +276,8 @@ void RobotController::runPlayMode()
 
     int iCurrentWp = 0;
     int nWp = getNumWayPoints();
+    int speed = 0;
+    bool skipWaitCompletion = true;
 
     lockRobot(true);
     _monkey.enableMotorPower();
@@ -291,14 +293,27 @@ void RobotController::runPlayMode()
         lockRobot(true);
         if( _playWayPoints && nWp)
         {
-            if( _monkey.isMoveCompleted() )
+            int spNow = _monkey.getSpeedScale();
+            if( spNow != speed )
             {
+                skipWaitCompletion = true;
+            }
+            speed = spNow;
+
+            if( _monkey.isMoveCompleted() || skipWaitCompletion )
+            {
+                skipWaitCompletion = false;
                 iCurrentWp = (iCurrentWp+1) % nWp;
                 AppBoard::lcd().updateModeInfo(RemoteMessage::MODE_REPLAY, iCurrentWp);
+                AppBoard::logStream().printf("\n[wp %d]", iCurrentWp);
                 _monkey.moveToWaypoint( *getWayPoint(iCurrentWp) );
             } // last waypoint completed
 
         } // is playing
+        else
+        {
+            skipWaitCompletion = true;
+        }
         lockRobot(false);
 
     } // while
