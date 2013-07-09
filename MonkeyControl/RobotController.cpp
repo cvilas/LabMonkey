@@ -279,6 +279,10 @@ void RobotController::runPlayMode()
     bool moveComplete = true;
     int speed = 0;
 
+    lockRobot(true);
+    _monkey.enableMotorPower();
+    lockRobot(false);
+
     while(!_modeButtonPressed && (_mode == RemoteMessage::MODE_REPLAY))
     {
         doFunctionButtons();
