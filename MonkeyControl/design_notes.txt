@@ -1,50 +1,14 @@
 Design notes:
 =============
 
-1. Command server thread (serial port)
-- block waits for remote commands
-- on GET_POSITION command,
-    -- reads shared memory 'current state buffer' for position
-    -- replies to remote client
-- on any other command
-    -- verifies it,
-    -- copies to shared memory 'desired state buffer'
-    -- Adds notification to 'command notification queue'
-- block waits on 'reply notification queue'
-- On reply notification
-    -- reads shared memory 'current state buffer'
-    -- replies to remote client
+- AppBoard
+    - singleton object, provides board pin mappings, etc
 
-2. Robot controller thread
-- initialise motor controllers
-- runs in a loop at all times
-- at the top of the loop
-    -- check command notification queue to check if command pending
-        -- if command pending, process 'desired state buffer' for the command and set notify 'reply notification queue'
-- do loop
-    -- process button press flags
-    -- process global velocity
-- at the end of loop
-    -- update shared memory 'current state buffer'
+- CommandServer
+    - TCP server for console messages
 
-3. interrupt service routines
-- update flags on button presses
+- RobotController
+    - main controller class for the robot
 
-Robot thread processes:
-- mode control
-- maintains motor waypoint list (position, max velocity, acceleration)
-- allows modification of waypoint list
-- Drives LCD (displays mode and immediate status)
-- Drives lamp
-- Drives buzzer
-- Reads and sets speed
-
-Implementation steps
-1. Define comms messages
-4. Implement command interface GUI (by Tue 11th)
-7. Implement GUI tasklist editor (Fri, Sat 15th)
-9. Implement rest of the essential elements in GUI
-10. Implement GUI 3D viewer for desktop guis (take coin and soqt from synaptic)
-11. Desktop GUI test
-12. Tablet GUI test
-*/
+- LabMonkey
+    - robot implementation

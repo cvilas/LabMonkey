@@ -22,7 +22,7 @@
 /// - Creates a TCP server on specified port
 /// - Accepts commands from remote console
 /// - Deframes the TCP packets
-/// - Interprets the command and notifies the robot controller thread
+/// - Interprets the command and calls the appropriate method in the robot controller
 /// - Waits for robot controller thread to respond
 /// - Replies to the remote console when a response becomes available
 class CommandServer

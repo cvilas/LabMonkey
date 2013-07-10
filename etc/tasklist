@@ -1,12 +1,20 @@
-- remove time parameter from waypoint
-- review speed scaling 
-	- scale down from fastest possible speed
-	- are the numbers correct (see debuglog)
-	- dynamic speed changes
-	- robot does not move after end of cycle if speed check introduced  in loop
-- implement OST like getpos (remove copy construction of istringstream
-- test everything on emulator
-- logging
-	- build time
-	- function activation
-	- waypoint cued - deltaT, deltaD, rpm 
+Wishlist for the future
+
+- Use the timing parameter in the WayPoint object to control motion time
+- Stiffen up motor control gains
+- Reimplement speed scaling as scaled time to waypoint 
+
+- Waypoint editor UI
+- Debounce buttons
+- Feedback for button pushes - lamps (preferred), buzzer
+- Simpler control interface on the arm (easy to get button pushes wrong at the moment)
+- 3d display UI
+
+- Implement joint limits
+- Kinematic model 
+- Dynamic model 
+- gravity compensation
+- Trajectory generation and control
+- Force compliance (collision detection and force control)
+- Improved motor design (reduce backlash)
+- 3D camera integration

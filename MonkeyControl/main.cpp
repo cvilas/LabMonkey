@@ -1,3 +1,9 @@
+//==============================================================================
+// Project  : Lab Monkey
+// Module   : robot
+// File     : main.cpp
+//==============================================================================
+
 #include "AppBoard.h"
 #include "CommandServer.h"
 #include "RobotController.h"

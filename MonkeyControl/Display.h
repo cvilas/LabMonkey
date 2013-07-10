@@ -12,6 +12,7 @@
 #include "C12832_lcd.h"
 #include "../MonkeyMessages/RemoteMessages.h"
 
+/// \brief mbed LCD display functions
 class Display
 {
 public:
